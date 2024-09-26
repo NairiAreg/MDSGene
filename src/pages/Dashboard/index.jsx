@@ -1,22 +1,20 @@
 import React, { useState } from "react";
 import {
-  Box,
   Tabs,
   TabList,
   TabPanels,
   Tab,
   TabPanel,
-  Heading,
   Image,
   Flex,
   Container,
 } from "@chakra-ui/react";
 import SignsAndSymptoms from "./SignsAndSymptoms";
 import Genes from "./Genes";
-// import Methods from "./Methods.jsx";
-// import Disclaimer from "./Disclaimer.jsx";
-// import AboutUs from "./AboutUs.jsx";
-// import Publications from "./Publications.jsx";
+import Methods from "./Methods";
+import Disclaimer from "./Disclaimer.jsx";
+import AboutUs from "./AboutUs.jsx";
+import Publications from "./Publications.jsx";
 import ContactUs from "./ContactUs.jsx";
 
 const MDSGeneDashboard = () => {
@@ -44,6 +42,18 @@ const MDSGeneDashboard = () => {
           </TabPanel>
           <TabPanel mx="44px">
             <Genes />
+          </TabPanel>
+          <TabPanel mx="44px">
+            <Methods />
+          </TabPanel>
+          <TabPanel mx="44px">
+            <Disclaimer />
+          </TabPanel>
+          <TabPanel mx="44px">
+            <AboutUs />
+          </TabPanel>
+          <TabPanel mx="44px">
+            <Publications />
           </TabPanel>
           <TabPanel mx="44px">
             <ContactUs />

@@ -1,9 +1,7 @@
 import React, { useRef } from "react";
 import {
   VStack,
-  Text,
   Box,
-  Heading,
   Alert,
   AlertIcon,
   AlertTitle,
