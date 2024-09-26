@@ -60,7 +60,7 @@ const Methods = () => {
       </TextBlock>
 
       <Box>
-        <Table variant="simple" mt={4}>
+        <Table variant="striped" colorScheme="gray" mt={4}>
           <Thead>
             <Tr>
               <Th>Evidence</Th>
