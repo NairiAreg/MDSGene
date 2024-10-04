@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link as RouterLink } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Box,
@@ -195,7 +195,7 @@ const Gene = () => {
         <Box overflowX="auto">
           {isLoading ? (
             <Flex w="full" mt={5} justify="center">
-              <Spinner />
+              <Spinner size="xl" />
             </Flex>
           ) : (
             <Table variant="striped" colorScheme="gray">
@@ -223,9 +223,9 @@ const Gene = () => {
                     <Tr key={study.pmid}>
                       <Td>
                         <Link
+                          as={RouterLink}
                           color="blue.500"
-                          href={`https://pubmed.ncbi.nlm.nih.gov/${study.pmid}/`}
-                          isExternal
+                          to={`/gene/${geneName}/${study.pmid}`}
                         >
                           {study.pmid}
                         </Link>

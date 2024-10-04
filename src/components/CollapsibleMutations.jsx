@@ -4,8 +4,6 @@ import { Button, Flex, Text } from "@chakra-ui/react";
 const CollapsibleMutations = ({ mutations, onMutationClick }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  console.log(mutations);
-
   const mutationArray = Object.entries(mutations)
     .filter(
       ([key, value]) =>
@@ -27,7 +25,7 @@ const CollapsibleMutations = ({ mutations, onMutationClick }) => {
   };
 
   return (
-    <Flex direction="column">
+    <Flex direction="column" align="center">
       {displayedMutations.map((mutation, index) => (
         <Text
           key={index}
