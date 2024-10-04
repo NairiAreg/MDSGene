@@ -1,27 +1,52 @@
-import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
-import { Box, Button, Text } from "@chakra-ui/react";
-import { useState } from "react";
+import React, { useState } from "react";
+import { Button, Flex, Text } from "@chakra-ui/react";
 
-const CollapsibleMutations = ({ mutations }) => {
+const CollapsibleMutations = ({ mutations, onMutationClick }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const displayedMutations = isExpanded ? mutations : mutations.slice(0, 3);
+
+  console.log(mutations);
+
+  const mutationArray = Object.entries(mutations)
+    .filter(
+      ([key, value]) =>
+        key.startsWith("mut") && value !== -99 && !key.includes("genotype")
+    )
+    .map(([key, value]) => ({ type: key, value }));
+
+  const displayedMutations = isExpanded
+    ? mutationArray
+    : mutationArray.slice(0, 3);
+
+  const handleClick = (mutation) => {
+    const [, num] = mutation.type.match(/mut(\d+)_(.)/);
+    const pMutation = mutations[`mut${num}_p`];
+    onMutationClick(
+      pMutation !== -99 ? pMutation : mutation.value,
+      mutation.type
+    );
+  };
 
   return (
-    <Box>
+    <Flex direction="column">
       {displayedMutations.map((mutation, index) => (
-        <Text key={index}>{mutation}</Text>
-      ))}
-      {mutations.length > 3 && (
-        <Button
-          size="sm"
-          onClick={() => setIsExpanded(!isExpanded)}
-          leftIcon={isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
-          mt={1}
+        <Text
+          key={index}
+          as="span"
+          cursor="pointer"
+          color="blue.500"
+          _hover={{ textDecoration: "underline" }}
+          onClick={() => handleClick(mutation)}
         >
-          {isExpanded ? "Show less" : `Show ${mutations.length - 3} more`}
+          {mutation.value}
+          {index < displayedMutations.length - 1 && ", "}
+        </Text>
+      ))}
+      {mutationArray.length > 3 && (
+        <Button size="xs" onClick={() => setIsExpanded(!isExpanded)} mt={1}>
+          {isExpanded ? "Show Less" : `+${mutationArray.length - 3} More`}
         </Button>
       )}
-    </Box>
+    </Flex>
   );
 };
 

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Box,
   VStack,
@@ -15,10 +15,17 @@ import {
   Link,
   Text,
   Spinner,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalCloseButton,
+  Badge,
 } from "@chakra-ui/react";
 import MultiSelectDropdown from "components/MultiSelectDropdown";
 import SingleSelectDropdown from "components/SingleSelectDropdown";
-import { uniqueStudiesQuery } from "api/api-service";
+import { uniqueStudiesQuery, mutationDataQuery } from "api/api-service";
 import { countries, filterOptions, formatMutations } from "utils/utils";
 import CollapsibleMutations from "components/CollapsibleMutations";
 
@@ -38,11 +45,28 @@ const Gene = () => {
   });
   const [selectedMutations, setSelectedMutations] = useState([]);
   const [selectedCountries, setSelectedCountries] = useState([]);
+  const [selectedMutationData, setSelectedMutationData] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
     ...uniqueStudiesQuery(disease, gene, filters),
     keepPreviousData: true,
   });
+
+  const handleMutationClick = async (mutP, originalMutation, pmid) => {
+    setIsModalOpen(true);
+    try {
+      const result = await queryClient.fetchQuery({
+        ...mutationDataQuery(disease, gene, pmid, mutP),
+      });
+      setSelectedMutationData({ data: result, originalMutation });
+    } catch (error) {
+      console.error("Error fetching mutation data:", error);
+      setSelectedMutationData({ error: "Failed to fetch mutation data" });
+    }
+  };
 
   useEffect(() => {
     setFilters((prevFilters) => ({
@@ -71,6 +95,44 @@ const Gene = () => {
   }, [selectedCountries]);
 
   if (error) return <Text>An error occurred: {error.message}</Text>;
+
+  const MutationDataDisplay = ({ data, originalMutation }) => (
+    <Box>
+      <Text fontSize="lg" fontWeight="bold" mb={4}>
+        Mutation: {originalMutation}
+      </Text>
+      {data.map((item, index) => (
+        <Box key={index} borderWidth={1} borderRadius="md" p={4} mb={4}>
+          <Flex justifyContent="space-between" alignItems="center" mb={2}>
+            <Badge colorScheme="blue">{item["Gene name"]}</Badge>
+            <Badge
+              colorScheme={
+                item["Pathogenicity scoring"] === "Pathogenic" ? "red" : "green"
+              }
+            >
+              {item["Pathogenicity scoring"]}
+            </Badge>
+          </Flex>
+          <Table size="sm">
+            <Tbody>
+              {Object.entries(item).map(([key, value]) => (
+                <Tr key={key}>
+                  <Th>{key}</Th>
+                  <Td>
+                    {Array.isArray(value)
+                      ? value.join(", ")
+                      : value === null
+                      ? "N/A"
+                      : value}
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Box>
+      ))}
+    </Box>
+  );
 
   return (
     <Box maxW="1200px" mx="auto" p={5}>
@@ -176,8 +238,16 @@ const Gene = () => {
                           : "N/A"}
                       </Td>
                       <Td>
+                        {/* {console.log(11,formatMutations(study.mutations))} */}
                         <CollapsibleMutations
-                          mutations={formatMutations(study.mutations)}
+                          mutations={study.mutations}
+                          onMutationClick={(mutP, originalMutation) =>
+                            handleMutationClick(
+                              mutP,
+                              originalMutation,
+                              study.pmid
+                            )
+                          }
                         />
                       </Td>
                     </Tr>
@@ -187,6 +257,32 @@ const Gene = () => {
           )}
         </Box>
       </VStack>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        size="xl"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Mutation Data</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {selectedMutationData ? (
+              selectedMutationData.error ? (
+                <Text color="red.500">{selectedMutationData.error}</Text>
+              ) : (
+                <MutationDataDisplay
+                  data={selectedMutationData.data}
+                  originalMutation={selectedMutationData.originalMutation}
+                />
+              )
+            ) : (
+              <Spinner />
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };

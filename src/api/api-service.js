@@ -22,3 +22,21 @@ export const uniqueStudiesQuery = (dba, gba, filters = {}) => ({
     return response.data;
   },
 });
+
+export const mutationDataQuery = (diseaseAbbrev, gene, pmid, mutP) => ({
+  queryKey: ["mutationData", diseaseAbbrev, gene, pmid, mutP],
+  queryFn: async () => {
+    const params = new URLSearchParams({
+      disease_abbrev: diseaseAbbrev,
+      gene: gene,
+      pmid: pmid,
+      mut_p: mutP,
+      directory: "excel",
+    });
+
+    const response = await axios.get(
+      `${BASE_URL}/data_for_mutation?${params.toString()}`
+    );
+    return response.data;
+  },
+});
