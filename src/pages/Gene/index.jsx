@@ -43,7 +43,6 @@ const Gene = () => {
     ...uniqueStudiesQuery(disease, gene, filters),
     keepPreviousData: true,
   });
-  console.log(data);
 
   useEffect(() => {
     setFilters((prevFilters) => ({
@@ -94,7 +93,11 @@ const Gene = () => {
               options={[
                 ...new Set(
                   data?.flatMap((study) =>
-                    Object.values(study.mutations).filter((mut) => mut !== -99)
+                    Object.entries(study.mutations)
+                      .filter(
+                        ([key, mut]) => mut !== -99 && !key.includes("genotype")
+                      )
+                      .map(([, mut]) => mut)
                   ) || []
                 ),
               ]}
@@ -134,41 +137,51 @@ const Gene = () => {
                 </Tr>
               </Thead>
               <Tbody>
-                {data?.map((study) => (
-                  <Tr key={study.pmid}>
-                    <Td>
-                      <Link
-                        color="blue.500"
-                        href={`https://pubmed.ncbi.nlm.nih.gov/${study.pmid}/`}
-                        isExternal
-                      >
-                        {study.pmid}
-                      </Link>
-                    </Td>
-                    <Td>{study.study_design}</Td>
-                    <Td>{study.number_of_cases}</Td>
-                    <Td>{study.ethnicity !== -99 ? study.ethnicity : "N/A"}</Td>
-                    <Td>
-                      {(study.proportion_of_male_patients * 100).toFixed(2)}%
-                    </Td>
-                    <Td whiteSpace="pre">
-                      {study.mean_age_at_onset !== -99
-                        ? `${study.mean_age_at_onset?.toFixed(2)} ${
-                            study.std_dev_age_at_onset
-                              ? `\n(+/- ${study.std_dev_age_at_onset?.toFixed(
-                                  2
-                                )})`
-                              : ""
-                          }`
-                        : "N/A"}
-                    </Td>
-                    <Td>
-                      <CollapsibleMutations
-                        mutations={formatMutations(study.mutations)}
-                      />
-                    </Td>
-                  </Tr>
-                ))}
+                {data
+                  ?.filter(
+                    ({ mutations }) =>
+                      selectedMutations.length === 0 ||
+                      Object.values(mutations).some((e) =>
+                        selectedMutations?.includes(e)
+                      )
+                  )
+                  ?.map((study) => (
+                    <Tr key={study.pmid}>
+                      <Td>
+                        <Link
+                          color="blue.500"
+                          href={`https://pubmed.ncbi.nlm.nih.gov/${study.pmid}/`}
+                          isExternal
+                        >
+                          {study.pmid}
+                        </Link>
+                      </Td>
+                      <Td>{study.study_design}</Td>
+                      <Td>{study.number_of_cases}</Td>
+                      <Td>
+                        {study.ethnicity !== -99 ? study.ethnicity : "N/A"}
+                      </Td>
+                      <Td>
+                        {(study.proportion_of_male_patients * 100).toFixed(2)}%
+                      </Td>
+                      <Td whiteSpace="pre">
+                        {study.mean_age_at_onset !== -99
+                          ? `${study.mean_age_at_onset?.toFixed(2)} ${
+                              study.std_dev_age_at_onset
+                                ? `\n(+/- ${study.std_dev_age_at_onset?.toFixed(
+                                    2
+                                  )})`
+                                : ""
+                            }`
+                          : "N/A"}
+                      </Td>
+                      <Td>
+                        <CollapsibleMutations
+                          mutations={formatMutations(study.mutations)}
+                        />
+                      </Td>
+                    </Tr>
+                  ))}
               </Tbody>
             </Table>
           )}
