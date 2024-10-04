@@ -1,3 +1,11 @@
+/* eslint-disable eqeqeq */
+export const searchCountriesByAbbr = (searchTerm) => {
+  const upperSearchTerm = searchTerm.toUpperCase();
+  return Object.keys(countries)
+    .filter((abbr) => abbr.startsWith(upperSearchTerm))
+    .map((abbr) => countries[abbr]);
+};
+
 export const countries = {
   AFG: "Afghanistan",
   ALB: "Albania",
@@ -200,11 +208,13 @@ export const filterOptions = [
 export const formatMutations = (mutations) => {
   const formattedMutations = [];
   for (let i = 1; i <= 3; i++) {
-    if (mutations[`mut${i}_p`] !== -99) {
-      formattedMutations.push(
-        `${mutations[`mut${i}_p`]} (${mutations[`mut${i}_genotype`]})`
-      );
-    }
+    ["c", "g", "p"].forEach((lt) => {
+      if (mutations[`mut${i}_${lt}`] !== -99) {
+        formattedMutations.push(
+          `${mutations[`mut${i}_${lt}`]} (${mutations[`mut${i}_genotype`]})`
+        );
+      }
+    });
   }
-  return formattedMutations.join(", ") || "N/A";
+  return formattedMutations.length > 0 ? formattedMutations : ["N/A"];
 };

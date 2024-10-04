@@ -10,9 +10,9 @@ import {
   Flex,
   Text,
 } from "@chakra-ui/react";
+import { searchCountriesByAbbr } from "utils/utils";
 
 const MultiSelectDropdown = ({
-  onChange,
   options,
   selectedItems,
   setSelectedItems,
@@ -27,7 +27,8 @@ const MultiSelectDropdown = ({
   const filteredOptions = options?.filter(
     (option) =>
       !selectedItems?.includes(option) &&
-      option?.toLowerCase()?.includes(inputValue?.toLowerCase())
+      (option?.toLowerCase()?.includes(inputValue?.toLowerCase()) ||
+        searchCountriesByAbbr(inputValue).includes(option))
   );
 
   useEffect(() => {
@@ -52,7 +53,6 @@ const MultiSelectDropdown = ({
     setSelectedItems([...selectedItems, item]);
     setInputValue("");
     inputRef.current.focus();
-    onChange(item);
   };
 
   const handleRemoveItem = (item) => {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -20,47 +20,56 @@ import MultiSelectDropdown from "components/MultiSelectDropdown";
 import SingleSelectDropdown from "components/SingleSelectDropdown";
 import { uniqueStudiesQuery } from "api/api-service";
 import { countries, filterOptions, formatMutations } from "utils/utils";
+import CollapsibleMutations from "components/CollapsibleMutations";
 
 const Gene = () => {
   const { geneName } = useParams();
-  const [dba, gba] = geneName.split("-");
+  const [disease, gene] = geneName.split("-");
   const [filters, setFilters] = useState({
     filterCriteria: 0,
     aao: 50,
     countries: [],
     mutation: "",
   });
+
+  const [selectedPatientFilter, setSelectedPatientFilter] = useState({
+    type: "all included patients",
+    age: 50,
+  });
   const [selectedMutations, setSelectedMutations] = useState([]);
   const [selectedCountries, setSelectedCountries] = useState([]);
 
   const { data, isLoading, error } = useQuery({
-    ...uniqueStudiesQuery(dba, gba, filters),
+    ...uniqueStudiesQuery(disease, gene, filters),
     keepPreviousData: true,
   });
+  console.log(data);
 
-  console.log(filters);
-  const handleFilterChange = (filterType, value) => {
-    setFilters((prevFilters) => {
-      const newFilters = { ...prevFilters };
+  useEffect(() => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      filterCriteria: filterOptions.indexOf(selectedPatientFilter.type),
+      aao: selectedPatientFilter.type.includes("AAO")
+        ? selectedPatientFilter.age
+        : prevFilters.aao,
+    }));
+  }, [selectedPatientFilter]);
 
-      if (filterType === "patientFilter") {
-        newFilters.filterCriteria = filterOptions.indexOf(value.type);
-        if (value.type.includes("AAO")) {
-          newFilters.aao = value.age;
-        } else {
-          delete newFilters.aao;
-        }
-      } else if (filterType === "country") {
-        newFilters.countries = selectedCountries.map((country) =>
-          Object.keys(countries).find((key) => countries[key] === country)
-        );
-      } else if (filterType === "mutation") {
-        newFilters.mutation = value[0] || "";
-      }
+  useEffect(() => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      mutation: selectedMutations[0] || "",
+    }));
+  }, [selectedMutations]);
 
-      return newFilters;
-    });
-  };
+  useEffect(() => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      countries: selectedCountries.map((country) =>
+        Object.keys(countries).find((key) => countries[key] === country)
+      ),
+    }));
+  }, [selectedCountries]);
 
   if (error) return <Text>An error occurred: {error.message}</Text>;
 
@@ -77,13 +86,12 @@ const Gene = () => {
               options={filterOptions}
               placeholder="Select patient filter"
               label="Filter for"
-              onChange={(value) => handleFilterChange("patientFilter", value)}
+              onChange={setSelectedPatientFilter}
             />
           </Box>
           <Box width="48%">
             <MultiSelectDropdown
               options={[
-                "Any mutation",
                 ...new Set(
                   data?.flatMap((study) =>
                     Object.values(study.mutations).filter((mut) => mut !== -99)
@@ -92,19 +100,17 @@ const Gene = () => {
               ]}
               placeholder="Select mutation"
               label="carrying"
-              onChange={(value) => handleFilterChange("mutation", value)}
               selectedItems={selectedMutations}
               setSelectedItems={setSelectedMutations}
             />
           </Box>
           <Box width="48%">
             <MultiSelectDropdown
-              options={["All countries", ...Object.values(countries)]}
+              options={Object.values(countries)}
               placeholder="Select country"
               label="Country"
               selectedItems={selectedCountries}
               setSelectedItems={setSelectedCountries}
-              onChange={(value) => handleFilterChange("country", value)}
             />
           </Box>
         </Flex>
@@ -145,14 +151,22 @@ const Gene = () => {
                     <Td>
                       {(study.proportion_of_male_patients * 100).toFixed(2)}%
                     </Td>
-                    <Td>
+                    <Td whiteSpace="pre">
                       {study.mean_age_at_onset !== -99
-                        ? `${
-                            study.mean_age_at_onset
-                          } (+/- ${study.std_dev_age_at_onset?.toFixed(2)})`
+                        ? `${study.mean_age_at_onset?.toFixed(2)} ${
+                            study.std_dev_age_at_onset
+                              ? `\n(+/- ${study.std_dev_age_at_onset?.toFixed(
+                                  2
+                                )})`
+                              : ""
+                          }`
                         : "N/A"}
                     </Td>
-                    <Td>{formatMutations(study.mutations)}</Td>
+                    <Td>
+                      <CollapsibleMutations
+                        mutations={formatMutations(study.mutations)}
+                      />
+                    </Td>
                   </Tr>
                 ))}
               </Tbody>
