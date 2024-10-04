@@ -17,6 +17,16 @@ import AboutUs from "./AboutUs.jsx";
 import Publications from "./Publications.jsx";
 import ContactUs from "./ContactUs.jsx";
 
+const panels = [
+  { title: "SIGNS AND SYMPTOMS", component: SignsAndSymptoms },
+  { title: "GENES", component: Genes },
+  { title: "METHODS", component: Methods },
+  { title: "DISCLAIMER", component: Disclaimer },
+  { title: "ABOUT US", component: AboutUs },
+  { title: "PUBLICATIONS", component: Publications },
+  { title: "CONTACT US", component: ContactUs },
+];
+
 const MDSGeneDashboard = () => {
   const [tabIndex, setTabIndex] = useState(0);
 
@@ -28,36 +38,16 @@ const MDSGeneDashboard = () => {
       </Flex>
       <Tabs index={tabIndex} onChange={setTabIndex} mx="44px">
         <TabList>
-          <Tab>SIGNS AND SYMPTOMS</Tab>
-          <Tab>GENES</Tab>
-          <Tab>METHODS</Tab>
-          <Tab>DISCLAIMER</Tab>
-          <Tab>ABOUT US</Tab>
-          <Tab>PUBLICATIONS</Tab>
-          <Tab>CONTACT US</Tab>
+          {panels.map((panel, index) => (
+            <Tab key={index}>{panel.title}</Tab>
+          ))}
         </TabList>
         <TabPanels>
-          <TabPanel mx="44px">
-            <SignsAndSymptoms />
-          </TabPanel>
-          <TabPanel mx="44px">
-            <Genes />
-          </TabPanel>
-          <TabPanel mx="44px">
-            <Methods />
-          </TabPanel>
-          <TabPanel mx="44px">
-            <Disclaimer />
-          </TabPanel>
-          <TabPanel mx="44px">
-            <AboutUs />
-          </TabPanel>
-          <TabPanel mx="44px">
-            <Publications />
-          </TabPanel>
-          <TabPanel mx="44px">
-            <ContactUs />
-          </TabPanel>
+          {panels.map((panel, index) => (
+            <TabPanel key={index} mx="44px">
+              <panel.component />
+            </TabPanel>
+          ))}
         </TabPanels>
       </Tabs>
     </Container>

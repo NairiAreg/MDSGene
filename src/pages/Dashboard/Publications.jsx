@@ -1,16 +1,3 @@
-import React, { useRef } from "react";
-import {
-  VStack,
-  Text,
-  Box,
-  Heading,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
-  Button,
-  HStack,
-} from "@chakra-ui/react";
 import TextBlock from "components/TextBlock";
 
 const Introduction = () => (

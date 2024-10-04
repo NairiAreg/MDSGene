@@ -31,14 +31,21 @@ const PublicationLinks = ({ publications }) => (
   </HStack>
 );
 
-const GeneButton = ({ gene, inProgress }) => {
+const GeneButton = ({ gene, inProgress, disease }) => {
   let publications;
   if (typeof gene !== "string" && gene.publications) {
     publications = gene.publications;
   }
+
   return (
     <WrapItem>
-      <Button size="sm" variant="outline" position="relative">
+      <Button
+        as="a"
+        href={`/gene/${disease.match(/\(([^)]+)\)/)[1]}-${gene?.name || gene}`}
+        size="sm"
+        variant="outline"
+        position="relative"
+      >
         {gene?.name || gene}
         {inProgress && (
           <Text
@@ -68,7 +75,13 @@ const GeneButton = ({ gene, inProgress }) => {
   );
 };
 
-const SubIllnessSection = ({ name, genes, publications, inProgress }) => (
+const SubIllnessSection = ({
+  name,
+  genes,
+  publications,
+  inProgress,
+  disease,
+}) => (
   <Box mb={4}>
     {name && (
       <HStack mb={2}>
@@ -78,7 +91,12 @@ const SubIllnessSection = ({ name, genes, publications, inProgress }) => (
     )}
     <Wrap spacing={2}>
       {genes.map((gene, index) => (
-        <GeneButton key={index} gene={gene} inProgress={inProgress} />
+        <GeneButton
+          key={index}
+          disease={disease}
+          gene={gene}
+          inProgress={inProgress}
+        />
       ))}
     </Wrap>
   </Box>
@@ -104,10 +122,10 @@ const DiseaseSection = ({ title, content }) => {
         <VStack align="stretch" mt={4} spacing={4}>
           {Array.isArray(content) ? (
             content.map((subIllness, index) => (
-              <SubIllnessSection key={index} {...subIllness} />
+              <SubIllnessSection disease={title} key={index} {...subIllness} />
             ))
           ) : (
-            <SubIllnessSection {...content} />
+            <SubIllnessSection disease={title} {...content} />
           )}
         </VStack>
       </Collapse>
@@ -115,7 +133,7 @@ const DiseaseSection = ({ title, content }) => {
   );
 };
 
-const SignsAndSymptoms = () => {
+const Genes = () => {
   return (
     <VStack spacing={6} align="stretch">
       <Text fontSize="xl" fontWeight="bold" color="red.500">
@@ -128,7 +146,7 @@ const SignsAndSymptoms = () => {
   );
 };
 
-export default SignsAndSymptoms;
+export default Genes;
 
 const data = {
   "Spinocerebellar ataxia (ATX)": {
@@ -138,6 +156,9 @@ const data = {
         publications: ["https://pubmed.ncbi.nlm.nih.gov/example1/"],
       },
     ],
+  },
+  "(DBA)": {
+    genes: ["GBA"],
   },
   "Chorea (CHOR)": {
     genes: ["ADCY5", "NKX2-1", "PDE10A"],
