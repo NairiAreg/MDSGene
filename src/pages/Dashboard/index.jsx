@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
   Tabs,
   TabList,
@@ -29,6 +30,20 @@ const panels = [
 
 const MDSGeneDashboard = () => {
   const [tabIndex, setTabIndex] = useState(0);
+  const location = useLocation();
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const tab = searchParams.get("tab");
+    if (tab) {
+      const index = panels.findIndex(
+        (panel) => panel.title.toLowerCase() === tab.toLowerCase()
+      );
+      if (index !== -1) {
+        setTabIndex(index);
+      }
+    }
+  }, [location]);
 
   return (
     <Container maxW="1200px" p={5}>

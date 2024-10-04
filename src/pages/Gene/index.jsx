@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Box,
@@ -22,16 +22,20 @@ import {
   ModalBody,
   ModalCloseButton,
   Badge,
+  Button,
 } from "@chakra-ui/react";
 import MultiSelectDropdown from "components/MultiSelectDropdown";
 import SingleSelectDropdown from "components/SingleSelectDropdown";
 import { uniqueStudiesQuery, mutationDataQuery } from "api/api-service";
-import { countries, filterOptions, formatMutations } from "utils/utils";
+import { countries, filterOptions } from "utils/utils";
 import CollapsibleMutations from "components/CollapsibleMutations";
+import Navbar from "components/Navbar";
+import { ArrowBackIcon } from "@chakra-ui/icons";
 
 const Gene = () => {
   const { geneName } = useParams();
   const [disease, gene] = geneName.split("-");
+  const navigate = useNavigate();
   const [filters, setFilters] = useState({
     filterCriteria: 0,
     aao: 50,
@@ -136,6 +140,14 @@ const Gene = () => {
 
   return (
     <Box maxW="1200px" mx="auto" p={5}>
+      <Button
+        leftIcon={<ArrowBackIcon />}
+        onClick={() => navigate("/?tab=genes")}
+        mb={4}
+        variant="outline"
+      >
+        Back to Genes
+      </Button>
       <VStack spacing={8} align="stretch">
         <Heading as="h1" size="xl">
           Overview of included studies for {geneName}:
@@ -238,7 +250,6 @@ const Gene = () => {
                           : "N/A"}
                       </Td>
                       <Td>
-                        {/* {console.log(11,formatMutations(study.mutations))} */}
                         <CollapsibleMutations
                           mutations={study.mutations}
                           onMutationClick={(mutP, originalMutation) =>
