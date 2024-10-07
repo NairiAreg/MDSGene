@@ -160,6 +160,9 @@ const data = {
   "(DBA)": {
     genes: ["GBA"],
   },
+  "(PARK)": {
+    genes: ["LRRK2"],
+  },
   "Chorea (CHOR)": {
     genes: ["ADCY5", "NKX2-1", "PDE10A"],
   },

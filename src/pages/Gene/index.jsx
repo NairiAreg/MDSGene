@@ -1,3 +1,5 @@
+// TODO add paginations and search
+// Beautify Navbar and title
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, Link as RouterLink } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -29,7 +31,6 @@ import SingleSelectDropdown from "components/SingleSelectDropdown";
 import { uniqueStudiesQuery, mutationDataQuery } from "api/api-service";
 import { countries, filterOptions } from "utils/utils";
 import CollapsibleMutations from "components/CollapsibleMutations";
-import Navbar from "components/Navbar";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 
 const Gene = () => {
@@ -140,14 +141,24 @@ const Gene = () => {
 
   return (
     <Box maxW="1200px" mx="auto" p={5}>
-      <Button
-        leftIcon={<ArrowBackIcon />}
-        onClick={() => navigate("/?tab=genes")}
-        mb={4}
-        variant="outline"
-      >
-        Back to Genes
-      </Button>
+      <Flex gap={4}>
+        <Button
+          leftIcon={<ArrowBackIcon />}
+          onClick={() => navigate("/?tab=genes")}
+          mb={4}
+          variant="outline"
+        >
+          Back to Genes
+        </Button>
+        <Button
+          onClick={() => navigate(`/charts/${geneName}`)}
+          mb={4}
+          ml={4}
+          variant="outline"
+        >
+          View Charts
+        </Button>
+      </Flex>
       <VStack spacing={8} align="stretch">
         <Heading as="h1" size="xl">
           Overview of included studies for {geneName}:
