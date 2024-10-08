@@ -125,3 +125,14 @@ export const reporterSignsSymptomsResponseQuery = (disease, gene) => ({
     return response.data;
   },
 });
+
+export const worldMapChartQuery = (disease, gene) => ({
+  queryKey: ["worldMapChartResponse", disease, gene],
+  queryFn: async () => {
+    const response = await axios.get(
+      `${BASE_URL}/world_map?disease_abbrev=${disease}&gene=${gene}&directory=excel`
+    );
+
+    return response.data;
+  },
+});

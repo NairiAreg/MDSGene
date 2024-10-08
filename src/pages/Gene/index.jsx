@@ -158,6 +158,14 @@ const Gene = () => {
         >
           View Charts
         </Button>
+        <Button
+          onClick={() => navigate(`/map/${geneName}`)}
+          mb={4}
+          ml={4}
+          variant="outline"
+        >
+          View World Map
+        </Button>
       </Flex>
       <VStack spacing={8} align="stretch">
         <Heading as="h1" size="xl">

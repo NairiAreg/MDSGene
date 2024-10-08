@@ -3,6 +3,7 @@ import Home from "./Dashboard";
 import Gene from "./Gene";
 import Charts from "./Charts";
 import StudyDetails from "./StudyDetails";
+import WorldMap from "./WorldMap";
 
 const routes = [
   {
@@ -22,6 +23,13 @@ const routes = [
   {
     path: "/charts/:geneName",
     Component: Charts,
+    Layout: DefaultLayout,
+    secured: false,
+    exact: true,
+  },
+  {
+    path: "/map/:geneName",
+    Component: WorldMap,
     Layout: DefaultLayout,
     secured: false,
     exact: true,
