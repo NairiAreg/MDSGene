@@ -1,18 +1,12 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Box,
-  Heading,
-  Spinner,
-  Text,
-  VStack,
-  SimpleGrid,
-} from "@chakra-ui/react";
+import { Box, Heading, Text, VStack, SimpleGrid } from "@chakra-ui/react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import highchartsMap from "highcharts/modules/map";
 import { worldMapChartQuery } from "api/api-service";
+import CustomSpinner from "components/CustomSpinner";
 
 highchartsMap(Highcharts);
 
@@ -59,7 +53,8 @@ const Charts = () => {
     worldMapChartQuery(disease, gene)
   );
 
-  if (isLoading) return <Spinner />;
+  if (isLoading)
+    return <CustomSpinner mt="100px" type="DNA" color="#ac202d" size={200} />;
   if (error) return <Text>An error occurred: {error.message}</Text>;
 
   const { worldMap, mutations } = data;

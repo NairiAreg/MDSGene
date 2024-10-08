@@ -16,7 +16,6 @@ import {
   Flex,
   Link,
   Text,
-  Spinner,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -32,6 +31,7 @@ import { uniqueStudiesQuery, mutationDataQuery } from "api/api-service";
 import { countries, filterOptions } from "utils/utils";
 import CollapsibleMutations from "components/CollapsibleMutations";
 import { ArrowBackIcon } from "@chakra-ui/icons";
+import CustomSpinner from "components/CustomSpinner";
 
 const Gene = () => {
   const { geneName } = useParams();
@@ -214,7 +214,7 @@ const Gene = () => {
         <Box overflowX="auto">
           {isLoading ? (
             <Flex w="full" mt={5} justify="center">
-              <Spinner size="xl" />
+              <CustomSpinner type="MG" color="#ac202d" size={200} />
             </Flex>
           ) : (
             <Table variant="striped" colorScheme="gray">
@@ -308,7 +308,7 @@ const Gene = () => {
                 />
               )
             ) : (
-              <Spinner />
+              <CustomSpinner type="MG" color="#ac202d" size={200} />
             )}
           </ModalBody>
         </ModalContent>

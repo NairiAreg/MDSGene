@@ -13,12 +13,12 @@ import {
   Th,
   Td,
   Button,
-  Spinner,
   Text,
   Flex,
 } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { countries } from "utils/utils";
+import CustomSpinner from "components/CustomSpinner";
 
 const studyDetailsQuery = (disease, gene, pmid) => ({
   queryKey: ["studyDetails", disease, gene, pmid],
@@ -42,7 +42,7 @@ const StudyDetails = () => {
   if (isLoading)
     return (
       <Flex w="full" h="100vh" justify="center" align="center">
-        <Spinner size="xl" />
+        <CustomSpinner type="Circles" color="#ac202d" size={200} />
       </Flex>
     );
   if (error) return <Text>An error occurred: {error.message}</Text>;

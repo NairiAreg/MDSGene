@@ -1,14 +1,7 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Box,
-  Heading,
-  Spinner,
-  Text,
-  VStack,
-  SimpleGrid,
-} from "@chakra-ui/react";
+import { Box, Heading, Text, VStack, SimpleGrid } from "@chakra-ui/react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import {
@@ -20,11 +13,17 @@ import {
   levodopaResponseQuery,
   reporterSignsSymptomsResponseQuery,
 } from "api/api-service";
+import CustomSpinner from "components/CustomSpinner";
 
 const ChartWrapper = ({ id, queryFn, styles }) => {
   const { data, isLoading, error } = useQuery(queryFn);
 
-  if (isLoading) return <Spinner />;
+  if (isLoading)
+    return (
+      <Box id={id} width="100%" height={styles?.height || "400px"} {...styles}>
+        <CustomSpinner type="DNA" color="#ac202d" size={200} />
+      </Box>
+    );
   if (error) return <Text>An error occurred: {error.message}</Text>;
   const chartOptions = {
     ...data,
