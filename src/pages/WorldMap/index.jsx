@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -17,18 +17,16 @@ import { worldMapChartQuery } from "api/api-service";
 // Initialize the map module
 highchartsMap(Highcharts);
 
-const ChartWrapper = ({ id, queryFn, styles, isWorldMap = false }) => {
-  const { data, isLoading, error } = useQuery(queryFn);
-
+const ChartWrapper = ({ id, options, styles, isWorldMap = false }) => {
   useEffect(() => {
-    if (isWorldMap && data) {
+    if (isWorldMap && options) {
       fetch("https://code.highcharts.com/mapdata/custom/world.topo.json")
         .then((response) => response.json())
         .then((topology) => {
           const chartOptions = {
-            ...data.worldMap,
+            ...options,
             chart: {
-              ...data.worldMap.chart,
+              ...options.chart,
               height: styles?.height || "400px",
             },
           };
@@ -38,10 +36,7 @@ const ChartWrapper = ({ id, queryFn, styles, isWorldMap = false }) => {
           Highcharts.mapChart(id, chartOptions);
         });
     }
-  }, [data, id, isWorldMap, styles]);
-
-  if (isLoading) return <Spinner />;
-  if (error) return <Text>An error occurred: {error.message}</Text>;
+  }, [options, id, isWorldMap, styles]);
 
   if (isWorldMap) {
     return (
@@ -55,15 +50,15 @@ const ChartWrapper = ({ id, queryFn, styles, isWorldMap = false }) => {
   }
 
   const chartOptions = {
-    ...data,
+    ...options,
     chart: {
-      ...data.chart,
+      ...options.chart,
       height: styles?.height || "400px",
     },
   };
 
   return (
-    <Box id={id} width="100%" height={styles?.height || "400px"} {...styles}>
+    <Box width="100%" height={styles?.height || "400px"} {...styles}>
       <HighchartsReact highcharts={Highcharts} options={chartOptions} />
     </Box>
   );
@@ -72,18 +67,56 @@ const ChartWrapper = ({ id, queryFn, styles, isWorldMap = false }) => {
 const Charts = () => {
   const { geneName } = useParams();
   const [disease, gene] = geneName.split("-");
+  const [worldMapData, setWorldMapData] = useState(null);
+  const [mutationCharts, setMutationCharts] = useState([]);
 
-  const chartConfigs = [
-    {
-      id: "worldMapChart",
-      queryFn: worldMapChartQuery(disease, gene),
-      styles: {
-        height: "800px",
-        width: "100%",
-      },
-      isWorldMap: true,
-    },
-  ];
+  const { data, isLoading, error } = useQuery(
+    worldMapChartQuery(disease, gene)
+  );
+
+  useEffect(() => {
+    if (data) {
+      setWorldMapData(data.worldMap);
+      const mutationData = Object.entries(data.mutations).map(
+        ([country, chartData]) => ({
+          id: `mutation-${country}`,
+          options: {
+            ...chartData,
+            chart: {
+              ...chartData.chart,
+              height: 600,
+              width: null, // Allow the chart to fill the container width
+            },
+            title: {
+              ...chartData.title,
+              style: {
+                ...chartData.title.style,
+                fontSize: "16px", // Increase title font size
+              },
+            },
+            plotOptions: {
+              ...chartData.plotOptions,
+              pie: {
+                ...chartData.plotOptions?.pie,
+                dataLabels: {
+                  ...chartData.plotOptions?.pie?.dataLabels,
+                  style: {
+                    ...chartData.plotOptions?.pie?.dataLabels?.style,
+                    fontSize: "14px", // Increase data label font size
+                  },
+                },
+              },
+            },
+          },
+          styles: { width: "100%", height: "600px" },
+        })
+      );
+      setMutationCharts(mutationData);
+    }
+  }, [data]);
+
+  if (isLoading) return <Spinner />;
+  if (error) return <Text>An error occurred: {error.message}</Text>;
 
   return (
     <Box maxW="100%" mx="auto" p={5}>
@@ -91,15 +124,22 @@ const Charts = () => {
         Charts for {geneName}
       </Heading>
       <VStack spacing={8} align="stretch">
-        <ChartWrapper {...chartConfigs[0]} />
+        <ChartWrapper
+          id="worldMapChart"
+          options={worldMapData}
+          styles={{ height: "800px", width: "100%" }}
+          isWorldMap={true}
+        />
+        <Heading as="h2" size="lg" mb={4}>
+          Mutation Distribution by Country
+        </Heading>
         <SimpleGrid columns={2} spacing={4}>
-          {chartConfigs.slice(1).map(({ id, queryFn, isWorldMap }) => (
+          {mutationCharts.map((chart) => (
             <ChartWrapper
-              key={id}
-              id={id}
-              queryFn={queryFn}
-              styles={{ width: "100%" }}
-              isWorldMap={isWorldMap}
+              key={chart.id}
+              id={chart.id}
+              options={chart.options}
+              styles={chart.styles}
             />
           ))}
         </SimpleGrid>
