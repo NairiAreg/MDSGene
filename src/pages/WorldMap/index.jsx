@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Heading, Text, VStack, SimpleGrid } from "@chakra-ui/react";
@@ -8,6 +8,7 @@ import highchartsMap from "highcharts/modules/map";
 import { worldMapChartQuery } from "api/api-service";
 import CustomSpinner from "components/CustomSpinner";
 
+// Initialize the map module
 highchartsMap(Highcharts);
 
 const ChartWrapper = ({ id, options, styles, isWorldMap = false }) => {
@@ -16,31 +17,43 @@ const ChartWrapper = ({ id, options, styles, isWorldMap = false }) => {
       fetch("https://code.highcharts.com/mapdata/custom/world.topo.json")
         .then((response) => response.json())
         .then((topology) => {
-          Highcharts.mapChart(id, {
+          const chartOptions = {
             ...options,
             chart: {
               ...options.chart,
               height: styles?.height || "400px",
-              map: topology,
             },
-            series: [{ ...options.series[0], mapData: topology }],
-          });
+          };
+          chartOptions.chart.map = topology;
+          chartOptions.series[0].mapData = topology;
+
+          Highcharts.mapChart(id, chartOptions);
         });
     }
   }, [options, id, isWorldMap, styles]);
 
+  if (isWorldMap) {
+    return (
+      <Box
+        id={id}
+        width="100%"
+        height={styles?.height || "400px"}
+        {...styles}
+      />
+    );
+  }
+
   const chartOptions = {
     ...options,
-    chart: { ...options.chart, height: styles?.height || "400px" },
+    chart: {
+      ...options.chart,
+      height: styles?.height || "400px",
+    },
   };
 
   return (
     <Box width="100%" height={styles?.height || "400px"} {...styles}>
-      {isWorldMap ? (
-        <div id={id} style={{ width: "100%", height: "100%" }} />
-      ) : (
-        <HighchartsReact highcharts={Highcharts} options={chartOptions} />
-      )}
+      <HighchartsReact highcharts={Highcharts} options={chartOptions} />
     </Box>
   );
 };
@@ -48,44 +61,57 @@ const ChartWrapper = ({ id, options, styles, isWorldMap = false }) => {
 const Charts = () => {
   const { geneName } = useParams();
   const [disease, gene] = geneName.split("-");
+  const [worldMapData, setWorldMapData] = useState(null);
+  const [mutationCharts, setMutationCharts] = useState([]);
 
   const { data, isLoading, error } = useQuery(
     worldMapChartQuery(disease, gene)
   );
 
-  if (isLoading)
-    return <CustomSpinner mt="100px" type="DNA" color="#ac202d" size={200} />;
-  if (error) return <Text>An error occurred: {error.message}</Text>;
-
-  const { worldMap, mutations } = data;
-
-  const mutationCharts = Object.entries(mutations).map(
-    ([country, chartData]) => ({
-      id: `mutation-${country}`,
-      options: {
-        ...chartData,
-        chart: { ...chartData.chart, height: 600, width: null },
-        title: {
-          ...chartData.title,
-          style: { ...chartData.title.style, fontSize: "16px" },
-        },
-        plotOptions: {
-          ...chartData.plotOptions,
-          pie: {
-            ...chartData.plotOptions?.pie,
-            dataLabels: {
-              ...chartData.plotOptions?.pie?.dataLabels,
+  useEffect(() => {
+    if (data) {
+      setWorldMapData(data.worldMap);
+      const mutationData = Object.entries(data.mutations).map(
+        ([country, chartData]) => ({
+          id: `mutation-${country}`,
+          options: {
+            ...chartData,
+            chart: {
+              ...chartData.chart,
+              height: 600,
+              width: null, // Allow the chart to fill the container width
+            },
+            title: {
+              ...chartData.title,
               style: {
-                ...chartData.plotOptions?.pie?.dataLabels?.style,
-                fontSize: "14px",
+                ...chartData.title.style,
+                fontSize: "16px", // Increase title font size
+              },
+            },
+            plotOptions: {
+              ...chartData.plotOptions,
+              pie: {
+                ...chartData.plotOptions?.pie,
+                dataLabels: {
+                  ...chartData.plotOptions?.pie?.dataLabels,
+                  style: {
+                    ...chartData.plotOptions?.pie?.dataLabels?.style,
+                    fontSize: "14px", // Increase data label font size
+                  },
+                },
               },
             },
           },
-        },
-      },
-      styles: { width: "100%", height: "600px" },
-    })
-  );
+          styles: { width: "100%", height: "600px" },
+        })
+      );
+      setMutationCharts(mutationData);
+    }
+  }, [data]);
+
+  if (isLoading)
+    return <CustomSpinner type="DNA" color="#ac202d" size={200} mt="40px" />;
+  if (error) return <Text>An error occurred: {error.message}</Text>;
 
   return (
     <Box maxW="100%" mx="auto" p={5}>
@@ -95,7 +121,7 @@ const Charts = () => {
       <VStack spacing={8} align="stretch">
         <ChartWrapper
           id="worldMapChart"
-          options={worldMap}
+          options={worldMapData}
           styles={{ height: "800px", width: "100%" }}
           isWorldMap={true}
         />
@@ -104,7 +130,12 @@ const Charts = () => {
         </Heading>
         <SimpleGrid columns={2} spacing={4}>
           {mutationCharts.map((chart) => (
-            <ChartWrapper key={chart.id} {...chart} />
+            <ChartWrapper
+              key={chart.id}
+              id={chart.id}
+              options={chart.options}
+              styles={chart.styles}
+            />
           ))}
         </SimpleGrid>
       </VStack>
