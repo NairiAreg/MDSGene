@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, Link as RouterLink } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -23,8 +23,21 @@ import {
   ModalCloseButton,
   useDisclosure,
   Badge,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  Divider,
 } from "@chakra-ui/react";
-import { PieChartIcon, GlobeIcon } from "lucide-react";
+import {
+  PieChartIcon,
+  GlobeIcon,
+  SearchIcon,
+  ChevronDownIcon,
+} from "lucide-react";
 import MultiSelectDropdown from "components/MultiSelectDropdown";
 import SingleSelectDropdown from "components/SingleSelectDropdown";
 import { uniqueStudiesQuery, mutationDataQuery } from "api/api-service";
@@ -33,6 +46,8 @@ import CollapsibleMutations from "components/CollapsibleMutations";
 import CustomSpinner from "components/CustomSpinner";
 import Charts from "../Charts";
 import WorldMap from "../WorldMap";
+import AdvancedPagination from "components/AdvancedPagination";
+import Search from "components/Search";
 
 const Gene = () => {
   const { geneName } = useParams();
@@ -64,12 +79,37 @@ const Gene = () => {
   const [selectedMutationData, setSelectedMutationData] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [showAll, setShowAll] = useState(false);
+
   const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
     ...uniqueStudiesQuery(disease, gene, filters),
     keepPreviousData: true,
   });
+
+  const filteredData = useMemo(() => {
+    if (!data) return [];
+    return data.filter(
+      (study) =>
+        study.pmid.toString().includes(searchTerm) ||
+        study.study_design.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        Object.values(study.mutations).some((mutation) =>
+          mutation.toString().toLowerCase().includes(searchTerm.toLowerCase())
+        )
+    );
+  }, [data, searchTerm]);
+
+  const paginatedData = useMemo(() => {
+    if (showAll) return filteredData;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredData.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredData, currentPage, itemsPerPage, showAll]);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   const handleMutationClick = async (mutP, originalMutation, pmid) => {
     setIsModalOpen(true);
@@ -119,6 +159,11 @@ const Gene = () => {
     countries: filters.countries.join(","),
     mutations: filters.mutations.join(","),
   });
+
+  const handleSearch = (term) => {
+    setSearchTerm(term);
+    setCurrentPage(1);
+  };
 
   if (error) return <Text>An error occurred: {error.message}</Text>;
 
@@ -228,14 +273,37 @@ const Gene = () => {
             </Box>
           </Flex>
 
-          <Box overflowX="auto">
+          <Divider />
+
+          <Flex justify="space-between" align="center" wrap="wrap" gap={4}>
+            <Search onSearch={handleSearch} />
+            <Menu>
+              <MenuButton
+                as={Button}
+                rightIcon={<ChevronDownIcon />}
+                variant="outline"
+                borderRadius="full"
+              >
+                {itemsPerPage} per page
+              </MenuButton>
+              <MenuList>
+                {[5, 10, 20, 50, 100].map((value) => (
+                  <MenuItem key={value} onClick={() => setItemsPerPage(value)}>
+                    {value} per page
+                  </MenuItem>
+                ))}
+              </MenuList>
+            </Menu>
+          </Flex>
+
+          <Box overflowX="auto" boxShadow="md" borderRadius="lg">
             {isLoading ? (
               <Flex w="full" mt={5} justify="center">
                 <CustomSpinner type="MG" color="#ac202d" size={200} />
               </Flex>
             ) : (
-              <Table variant="striped" colorScheme="gray">
-                <Thead>
+              <Table variant="simple" colorScheme="gray">
+                <Thead bg="gray.50">
                   <Tr>
                     <Th>Study</Th>
                     <Th>Study design</Th>
@@ -247,7 +315,7 @@ const Gene = () => {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {data
+                  {paginatedData
                     ?.filter(
                       ({ mutations }) =>
                         selectedMutations.length === 0 ||
@@ -304,7 +372,27 @@ const Gene = () => {
               </Table>
             )}
           </Box>
+
+          <Flex justify="space-between" align="center">
+            <Button
+              onClick={() => setShowAll(!showAll)}
+              variant={showAll ? "solid" : "outline"}
+              colorScheme="blue"
+              borderRadius="full"
+            >
+              {showAll ? "Show Paginated" : "Show All Results"}
+            </Button>
+
+            {!showAll && (
+              <AdvancedPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            )}
+          </Flex>
         </VStack>
+
         <Modal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
