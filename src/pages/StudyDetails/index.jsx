@@ -61,7 +61,7 @@ const StudyDetails = () => {
     <Box maxW="1200px" mx="auto" p={5}>
       <Button
         leftIcon={<ArrowBackIcon />}
-        onClick={() => navigate(`/gene/${geneName}`)}
+        onClick={() => navigate(`/genes/${geneName}`)}
         mb={4}
         variant="outline"
       >

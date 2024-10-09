@@ -143,15 +143,7 @@ const Gene = () => {
     <Box maxW="1200px" mx="auto" p={5}>
       <Flex gap={4}>
         <Button
-          leftIcon={<ArrowBackIcon />}
-          onClick={() => navigate("/?tab=genes")}
-          mb={4}
-          variant="outline"
-        >
-          Back to Genes
-        </Button>
-        <Button
-          onClick={() => navigate(`/charts/${geneName}`)}
+          onClick={() => navigate(`/genes/charts/${geneName}`)}
           mb={4}
           ml={4}
           variant="outline"
@@ -244,7 +236,7 @@ const Gene = () => {
                         <Link
                           as={RouterLink}
                           color="blue.500"
-                          to={`/gene/${geneName}/${study.pmid}`}
+                          to={`/genes/${geneName}/${study.pmid}`}
                         >
                           {study.pmid}
                         </Link>

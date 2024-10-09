@@ -1,7 +1,14 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Box, Heading, Text, VStack, SimpleGrid } from "@chakra-ui/react";
+import {
+  Box,
+  Heading,
+  Text,
+  VStack,
+  SimpleGrid,
+  Button,
+} from "@chakra-ui/react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import {
@@ -14,6 +21,7 @@ import {
   reporterSignsSymptomsResponseQuery,
 } from "api/api-service";
 import CustomSpinner from "components/CustomSpinner";
+import { ArrowBackIcon } from "@chakra-ui/icons";
 
 const ChartWrapper = ({ id, queryFn, styles }) => {
   const { data, isLoading, error } = useQuery(queryFn);
@@ -42,6 +50,7 @@ const ChartWrapper = ({ id, queryFn, styles }) => {
 const Charts = () => {
   const { geneName } = useParams();
   const [disease, gene] = geneName.split("-");
+  const navigate = useNavigate();
 
   const chartConfigs = [
     {
@@ -74,6 +83,14 @@ const Charts = () => {
       <Heading as="h1" size="xl" mb={4}>
         Charts for {geneName}
       </Heading>
+      <Button
+        leftIcon={<ArrowBackIcon />}
+        onClick={() => navigate(-1)}
+        mb={4}
+        variant="outline"
+      >
+        Back to Genes
+      </Button>
       <VStack spacing={8} align="stretch">
         <ChartWrapper {...chartConfigs[0]} />
         <SimpleGrid columns={2} spacing={4}>

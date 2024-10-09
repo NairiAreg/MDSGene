@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Tabs, TabList, Tab } from "@chakra-ui/react";
+import { Tabs, TabList, Tab, Flex, Image } from "@chakra-ui/react";
 
 const panels = [
   { title: "SIGNS AND SYMPTOMS", path: "/signs-and-symptoms" },
@@ -25,16 +25,25 @@ const Navbar = () => {
   );
 
   return (
-    <Tabs
-      index={currentTabIndex !== -1 ? currentTabIndex : 0}
-      onChange={handleTabChange}
-    >
-      <TabList>
-        {panels.map((panel, index) => (
-          <Tab key={index}>{panel.title}</Tab>
-        ))}
-      </TabList>
-    </Tabs>
+    <>
+      <Flex justifyContent="space-between" alignItems="center" mb={6}>
+        <Image src="/logo1.png" alt="MDSGene Logo" h="full" />
+        <Image src="/logo2.png" alt="IPMDS Logo" h="full" />
+      </Flex>
+      <Tabs
+        index={currentTabIndex !== -1 ? currentTabIndex : 0}
+        onChange={handleTabChange}
+        mb={8}
+      >
+        <TabList>
+          {panels.map((panel, index) => (
+            <Tab key={index} as="a" href={panel.path}>
+              {panel.title}
+            </Tab>
+          ))}
+        </TabList>
+      </Tabs>
+    </>
   );
 };
 

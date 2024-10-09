@@ -1,12 +1,14 @@
-import React from 'react'
-import { Box } from '@chakra-ui/react'
+import React from "react";
+import { Container } from "@chakra-ui/react";
+import Navbar from "components/Navbar";
 
 const DefaultLayout = ({ children }) => {
   return (
-    <Box minH="100vh" width="100%">
+    <Container maxW="1200px" p={5}>
+      <Navbar />
       {children}
-    </Box>
-  )
-}
+    </Container>
+  );
+};
 
-export default DefaultLayout
+export default DefaultLayout;

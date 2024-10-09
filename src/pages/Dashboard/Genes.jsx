@@ -41,7 +41,7 @@ const GeneButton = ({ gene, inProgress, disease }) => {
     <WrapItem>
       <Button
         as="a"
-        href={`/gene/${disease.match(/\(([^)]+)\)/)[1]}-${gene?.name || gene}`}
+        href={`/genes/${disease.match(/\(([^)]+)\)/)[1]}-${gene?.name || gene}`}
         size="sm"
         variant="outline"
         position="relative"
