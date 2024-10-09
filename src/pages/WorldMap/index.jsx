@@ -115,9 +115,6 @@ const Charts = () => {
 
   return (
     <Box maxW="100%" mx="auto" p={5}>
-      <Heading as="h1" size="xl" mb={4}>
-        Charts for {geneName}
-      </Heading>
       <VStack spacing={8} align="stretch">
         <ChartWrapper
           id="worldMapChart"
