@@ -3,17 +3,34 @@ import axios from "axios";
 
 const BASE_URL = "http://127.0.0.1:8000";
 
+const appendFilters = (params, filters) => {
+  const { filterCriteria, aao, countries, mutations } = filters;
+  if (filterCriteria !== undefined)
+    params.append("filter_criteria", filterCriteria);
+  if (aao !== undefined) params.append("aao", aao);
+  if (countries) {
+    // Check if countries is a string, otherwise join the array
+    if (typeof countries === "string") {
+      params.append("countries", countries);
+    } else if (Array.isArray(countries) && countries.length > 0) {
+      params.append("countries", countries.join(","));
+    }
+  }
+  if (mutations) {
+    // Check if mutations is a string, otherwise join the array
+    if (typeof mutations === "string") {
+      params.append("mutations", mutations);
+    } else if (Array.isArray(mutations) && mutations.length > 0) {
+      params.append("mutations", mutations.join(","));
+    }
+  }
+};
+
 export const uniqueStudiesQuery = (dba, gba, filters = {}) => ({
   queryKey: ["uniqueStudies", dba, gba, filters],
   queryFn: async () => {
-    const { filterCriteria, aao, countries, mutation } = filters;
     const params = new URLSearchParams();
-
-    if (filterCriteria !== undefined)
-      params.append("filter_criteria", filterCriteria);
-    if (aao !== undefined) params.append("aao", aao);
-    if (countries) params.append("countries", countries);
-    if (mutation) params.append("mutation", mutation);
+    appendFilters(params, filters);
 
     const response = await axios.get(
       `${BASE_URL}/unique_studies/${dba}/${gba}${
@@ -42,97 +59,59 @@ export const mutationDataQuery = (diseaseAbbrev, gene, pmid, mutP) => ({
   },
 });
 
-export const aaoEmpiricalDistributionQuery = (disease, gene) => ({
-  queryKey: ["aaoEmpiricalDistribution", disease, gene],
-  queryFn: async () => {
-    const response = await axios.get(
-      `${BASE_URL}/aao_empirical_distribution?disease_abbrev=${disease}&gene=${gene}&directory=excel`
-    );
-    const chartOptions = response.data;
-    chartOptions.yAxis.labels.formatter = eval(
-      `(${chartOptions.yAxis.labels.formatter.__function})`
-    );
-    return response.data;
-  },
-});
+const createFilteredQuery =
+  (endpoint, processResponse = (data) => data) =>
+  (disease, gene, filters = {}) => ({
+    queryKey: [endpoint, disease, gene, filters],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        disease_abbrev: disease,
+        gene: gene,
+        directory: "excel",
+      });
+      appendFilters(params, filters);
 
-export const ethnicityPieChartQuery = (disease, gene) => ({
-  queryKey: ["ethnicityPieChart", disease, gene],
-  queryFn: async () => {
-    const response = await axios.get(
-      `${BASE_URL}/ethnicity_pie_chart?disease_abbrev=${disease}&gene=${gene}&directory=excel`
-    );
-    return response.data;
-  },
-});
+      const response = await axios.get(
+        `${BASE_URL}/${endpoint}?${params.toString()}`
+      );
+      return processResponse(response.data);
+    },
+  });
 
-export const countryPieChartQuery = (disease, gene) => ({
-  queryKey: ["countryPieChart", disease, gene],
-  queryFn: async () => {
-    const response = await axios.get(
-      `${BASE_URL}/country_pie_chart?disease_abbrev=${disease}&gene=${gene}&directory=excel`
+export const aaoEmpiricalDistributionQuery = createFilteredQuery(
+  "aao_empirical_distribution",
+  (data) => {
+    data.yAxis.labels.formatter = eval(
+      `(${data.yAxis.labels.formatter.__function})`
     );
-    return response.data;
-  },
-});
+    return data;
+  }
+);
 
-export const levodopaResponseQuery = (disease, gene) => ({
-  queryKey: ["levodopaResponse", disease, gene],
-  queryFn: async () => {
-    const response = await axios.get(
-      `${BASE_URL}/levodopa_response?disease_abbrev=${disease}&gene=${gene}&directory=excel`
-    );
-    return response.data;
-  },
-});
+export const ethnicityPieChartQuery = createFilteredQuery(
+  "ethnicity_pie_chart"
+);
 
-export const initialSignsAndSymptomsResponseQuery = (disease, gene) => ({
-  queryKey: ["initialSignsAndSymptomsResponse", disease, gene],
-  queryFn: async () => {
-    const response = await axios.get(
-      `${BASE_URL}/initial_signs_symptoms?disease_abbrev=${disease}&gene=${gene}&directory=excel`
-    );
-    return response.data;
-  },
-});
+export const countryPieChartQuery = createFilteredQuery("country_pie_chart");
 
-export const aaoDistributionResponseQuery = (disease, gene) => ({
-  queryKey: ["aaoDistributionResponse", disease, gene],
-  queryFn: async () => {
-    const response = await axios.get(
-      `${BASE_URL}/aao_histogram?disease_abbrev=${disease}&gene=${gene}&directory=excel`
-    );
-    return response.data;
-  },
-});
+export const levodopaResponseQuery = createFilteredQuery("levodopa_response");
 
-export const reporterSignsSymptomsResponseQuery = (disease, gene) => ({
-  queryKey: ["reporterSignsSymptomsResponse", disease, gene],
-  queryFn: async () => {
-    const response = await axios.get(
-      `${BASE_URL}/reporter_signs_symptoms?disease_abbrev=${disease}&gene=${gene}&directory=excel`
-    );
-    const chartOptions = response.data;
-    chartOptions.plotOptions.series.dataLabels.formatter = eval(
-      "(" +
-        chartOptions.plotOptions.series.dataLabels.formatter.__function +
-        ")"
-    );
-    chartOptions.tooltip.formatter = eval(
-      "(" + chartOptions.tooltip.formatter.__function + ")"
-    );
+export const initialSignsAndSymptomsResponseQuery = createFilteredQuery(
+  "initial_signs_symptoms"
+);
 
-    return response.data;
-  },
-});
+export const aaoDistributionResponseQuery =
+  createFilteredQuery("aao_histogram");
 
-export const worldMapChartQuery = (disease, gene) => ({
-  queryKey: ["worldMapChartResponse", disease, gene],
-  queryFn: async () => {
-    const response = await axios.get(
-      `${BASE_URL}/world_map?disease_abbrev=${disease}&gene=${gene}&directory=excel`
+export const reporterSignsSymptomsResponseQuery = createFilteredQuery(
+  "reporter_signs_symptoms",
+  (data) => {
+    data.plotOptions.series.dataLabels.formatter = eval(
+      `(${data.plotOptions.series.dataLabels.formatter.__function})`
     );
+    data.tooltip.formatter = eval(`(${data.tooltip.formatter.__function})`);
+    return data;
+  }
+);
 
-    return response.data;
-  },
-});
+export const worldMapChartQuery = createFilteredQuery("world_map");

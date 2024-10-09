@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Heading, Text, VStack, SimpleGrid } from "@chakra-ui/react";
 import Highcharts from "highcharts";
@@ -58,14 +57,13 @@ const ChartWrapper = ({ id, options, styles, isWorldMap = false }) => {
   );
 };
 
-const Charts = () => {
-  const { geneName } = useParams();
+const WorldMap = ({ geneName, filters }) => {
   const [disease, gene] = geneName.split("-");
   const [worldMapData, setWorldMapData] = useState(null);
   const [mutationCharts, setMutationCharts] = useState([]);
 
   const { data, isLoading, error } = useQuery(
-    worldMapChartQuery(disease, gene)
+    worldMapChartQuery(disease, gene, filters)
   );
 
   useEffect(() => {
@@ -140,4 +138,4 @@ const Charts = () => {
   );
 };
 
-export default Charts;
+export default WorldMap;

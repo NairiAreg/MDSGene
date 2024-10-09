@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, Link as RouterLink } from "react-router-dom";
+import { useParams, Link as RouterLink } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Box,
@@ -30,7 +30,6 @@ import SingleSelectDropdown from "components/SingleSelectDropdown";
 import { uniqueStudiesQuery, mutationDataQuery } from "api/api-service";
 import { countries, filterOptions } from "utils/utils";
 import CollapsibleMutations from "components/CollapsibleMutations";
-import { ArrowBackIcon } from "@chakra-ui/icons";
 import CustomSpinner from "components/CustomSpinner";
 import Charts from "../Charts";
 import WorldMap from "../WorldMap";
@@ -38,7 +37,6 @@ import WorldMap from "../WorldMap";
 const Gene = () => {
   const { geneName } = useParams();
   const [disease, gene] = geneName.split("-");
-  const navigate = useNavigate();
   const {
     isOpen: isChartsOpen,
     onOpen: onChartsOpen,
@@ -54,7 +52,7 @@ const Gene = () => {
     filterCriteria: 0,
     aao: 50,
     countries: [],
-    mutation: "",
+    mutations: [],
   });
 
   const [selectedPatientFilter, setSelectedPatientFilter] = useState({
@@ -99,7 +97,7 @@ const Gene = () => {
   useEffect(() => {
     setFilters((prevFilters) => ({
       ...prevFilters,
-      mutation: selectedMutations[0] || "",
+      mutations: selectedMutations,
     }));
   }, [selectedMutations]);
 
@@ -111,6 +109,16 @@ const Gene = () => {
       ),
     }));
   }, [selectedCountries]);
+
+  const getFilterParams = () => ({
+    disease_abbrev: disease,
+    gene,
+    directory: "excel",
+    filterCriteria: filters.filterCriteria,
+    aao: filters.aao,
+    countries: filters.countries.join(","),
+    mutations: filters.mutations.join(","),
+  });
 
   if (error) return <Text>An error occurred: {error.message}</Text>;
 
@@ -203,7 +211,7 @@ const Gene = () => {
                     ) || []
                   ),
                 ]}
-                placeholder="Select mutation"
+                placeholder="Select mutations"
                 label="carrying"
                 selectedItems={selectedMutations}
                 setSelectedItems={setSelectedMutations}
@@ -328,7 +336,7 @@ const Gene = () => {
             <ModalHeader>Charts for {geneName}</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <Charts geneName={geneName} />
+              <Charts geneName={geneName} filters={getFilterParams()} />
             </ModalBody>
           </ModalContent>
         </Modal>
@@ -339,7 +347,7 @@ const Gene = () => {
             <ModalHeader>World Map for {geneName}</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <WorldMap geneName={geneName} />
+              <WorldMap geneName={geneName} filters={getFilterParams()} />
             </ModalBody>
           </ModalContent>
         </Modal>

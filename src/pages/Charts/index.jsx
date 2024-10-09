@@ -39,14 +39,13 @@ const ChartWrapper = ({ id, queryFn, styles }) => {
   );
 };
 
-const Charts = () => {
-  const { geneName } = useParams();
+const Charts = ({ geneName, filters }) => {
   const [disease, gene] = geneName.split("-");
 
   const chartConfigs = [
     {
       id: "reporterSignsSymptomsRChart",
-      queryFn: reporterSignsSymptomsResponseQuery(disease, gene),
+      queryFn: reporterSignsSymptomsResponseQuery(disease, gene, filters),
       styles: {
         height: "1500px",
         width: "100%",
@@ -54,19 +53,28 @@ const Charts = () => {
     },
     {
       id: "aaoDistributionChart",
-      queryFn: aaoDistributionResponseQuery(disease, gene),
+      queryFn: aaoDistributionResponseQuery(disease, gene, filters),
     },
-    { id: "lineChart", queryFn: aaoEmpiricalDistributionQuery(disease, gene) },
+    {
+      id: "lineChart",
+      queryFn: aaoEmpiricalDistributionQuery(disease, gene, filters),
+    },
     {
       id: "initialSignsAndSymptomsChart",
-      queryFn: initialSignsAndSymptomsResponseQuery(disease, gene),
+      queryFn: initialSignsAndSymptomsResponseQuery(disease, gene, filters),
     },
-    { id: "ethnicityPieChart", queryFn: ethnicityPieChartQuery(disease, gene) },
+    {
+      id: "ethnicityPieChart",
+      queryFn: ethnicityPieChartQuery(disease, gene, filters),
+    },
     {
       id: "levodopaResponseChart",
-      queryFn: levodopaResponseQuery(disease, gene),
+      queryFn: levodopaResponseQuery(disease, gene, filters),
     },
-    { id: "countryPieChart", queryFn: countryPieChartQuery(disease, gene) },
+    {
+      id: "countryPieChart",
+      queryFn: countryPieChartQuery(disease, gene, filters),
+    },
   ];
 
   return (
