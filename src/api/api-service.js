@@ -66,7 +66,7 @@ const createFilteredQuery =
     queryFn: async () => {
       const params = new URLSearchParams({
         disease_abbrev: disease,
-        gene: gene,
+        gene,
         directory: "excel",
       });
       appendFilters(params, filters);
@@ -81,6 +81,9 @@ const createFilteredQuery =
 export const aaoEmpiricalDistributionQuery = createFilteredQuery(
   "aao_empirical_distribution",
   (data) => {
+    if (!data) {
+      return null;
+    }
     data.yAxis.labels.formatter = eval(
       `(${data.yAxis.labels.formatter.__function})`
     );
@@ -106,6 +109,9 @@ export const aaoDistributionResponseQuery =
 export const reporterSignsSymptomsResponseQuery = createFilteredQuery(
   "reporter_signs_symptoms",
   (data) => {
+    if (!data) {
+      return null;
+    }
     data.plotOptions.series.dataLabels.formatter = eval(
       `(${data.plotOptions.series.dataLabels.formatter.__function})`
     );

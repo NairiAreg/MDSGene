@@ -1,7 +1,13 @@
 import React from "react";
-import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Box, Text, VStack, SimpleGrid } from "@chakra-ui/react";
+import {
+  Box,
+  Text,
+  VStack,
+  SimpleGrid,
+  Alert,
+  AlertIcon,
+} from "@chakra-ui/react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import {
@@ -18,13 +24,33 @@ import CustomSpinner from "components/CustomSpinner";
 const ChartWrapper = ({ id, queryFn, styles }) => {
   const { data, isLoading, error } = useQuery(queryFn);
 
-  if (isLoading)
+  if (isLoading) {
     return (
       <Box id={id} width="100%" height={styles?.height || "400px"} {...styles}>
         <CustomSpinner type="DNA" color="#ac202d" size={200} />
       </Box>
     );
-  if (error) return <Text>An error occurred: {error.message}</Text>;
+  }
+
+  if (error) {
+    return (
+      <Alert status="error">
+        <AlertIcon />
+        An error occurred: {error.message}
+      </Alert>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Alert status="info">
+        <AlertIcon />
+        No data available for this chart with current filters. Try changing or
+        removing filters
+      </Alert>
+    );
+  }
+
   const chartOptions = {
     ...data,
     chart: {
@@ -32,6 +58,7 @@ const ChartWrapper = ({ id, queryFn, styles }) => {
       height: styles?.height || "400px",
     },
   };
+
   return (
     <Box id={id} width="100%" height={styles?.height || "400px"} {...styles}>
       <HighchartsReact highcharts={Highcharts} options={chartOptions} />
