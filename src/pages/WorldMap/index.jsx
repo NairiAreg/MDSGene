@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Box, Heading, Text, VStack, SimpleGrid } from "@chakra-ui/react";
+import {
+  Box,
+  Heading,
+  Text,
+  VStack,
+  SimpleGrid,
+  Alert,
+  AlertIcon,
+} from "@chakra-ui/react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import highchartsMap from "highcharts/modules/map";
@@ -109,7 +117,24 @@ const WorldMap = ({ geneName, filters }) => {
 
   if (isLoading)
     return <CustomSpinner type="DNA" color="#ac202d" size={200} mt="40px" />;
-  if (error) return <Text>An error occurred: {error.message}</Text>;
+  if (error) {
+    return (
+      <Alert status="error">
+        <AlertIcon />
+        An error occurred: {error.message}
+      </Alert>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Alert status="info">
+        <AlertIcon />
+        No data available for this chart with current filters. Try changing or
+        removing filters
+      </Alert>
+    );
+  }
 
   return (
     <Box maxW="100%" mx="auto" p={5}>
