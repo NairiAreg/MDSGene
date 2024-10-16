@@ -40,6 +40,7 @@ import Charts from "../Charts";
 import WorldMap from "../WorldMap";
 import AdvancedPagination from "components/AdvancedPagination";
 import Search from "components/Search";
+import MutationDataDisplay from "components/MutationDataDisplay";
 
 const Gene = () => {
   const { geneName } = useParams();
@@ -175,44 +176,6 @@ const Gene = () => {
   };
 
   if (error) return <Text>An error occurred: {error.message}</Text>;
-
-  const MutationDataDisplay = ({ data, originalMutation, fullData }) => (
-    <Box>
-      <Text fontSize="lg" fontWeight="bold" mb={4}>
-        Mutation: {originalMutation}
-      </Text>
-      {data.map((item, index) => (
-        <Box key={index} borderWidth={1} borderRadius="md" p={4} mb={4}>
-          <Flex justifyContent="space-between" alignItems="center" mb={2}>
-            <Badge colorScheme="blue">{item["Gene name"]}</Badge>
-            <Badge
-              colorScheme={
-                item["Pathogenicity scoring"] === "Pathogenic" ? "red" : "green"
-              }
-            >
-              {item["Pathogenicity scoring"]}
-            </Badge>
-          </Flex>
-          <Table size="sm">
-            <Tbody>
-              {Object.entries(item).map(([key, value]) => (
-                <Tr key={key}>
-                  <Th>{key}</Th>
-                  <Td>
-                    {Array.isArray(value)
-                      ? value.join(", ")
-                      : value === null
-                      ? "N/A"
-                      : value}
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
-        </Box>
-      ))}
-    </Box>
-  );
 
   return (
     <Box maxW="1200px" mx="auto" p={5}>
@@ -405,19 +368,17 @@ const Gene = () => {
           size="xl"
         >
           <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Mutation Data</ModalHeader>
+          <ModalContent maxW="1000px">
+            <ModalHeader fontSize="xl" fontWeight="bold" color="red.600" mb={4}>
+              Mutation Data
+            </ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               {selectedMutationData ? (
                 selectedMutationData.error ? (
                   <Text color="red.500">{selectedMutationData.error}</Text>
                 ) : (
-                  <MutationDataDisplay
-                    data={selectedMutationData.data}
-                    fullData={selectedMutationData.fullMutationData}
-                    originalMutation={selectedMutationData.originalMutation}
-                  />
+                  <MutationDataDisplay data={selectedMutationData.data} />
                 )
               ) : (
                 <CustomSpinner type="MG" color="#ac202d" size={200} />

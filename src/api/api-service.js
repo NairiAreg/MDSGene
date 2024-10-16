@@ -55,7 +55,7 @@ export const mutationDataQuery = (diseaseAbbrev, gene, pmid, mutP) => ({
     const response = await axios.get(
       `${BASE_URL}/data_for_mutation?${params.toString()}`
     );
-    return response.data;
+    return response.data?.[0];
   },
 });
 
@@ -121,3 +121,13 @@ export const reporterSignsSymptomsResponseQuery = createFilteredQuery(
 );
 
 export const worldMapChartQuery = createFilteredQuery("world_map");
+
+export const publicationDataQuery = (pubmedIds) => ({
+  queryKey: ["publicationData", pubmedIds],
+  queryFn: async () => {
+    const response = await axios.get(
+      `${BASE_URL}/search_pubmed?pubmed_ids=${pubmedIds.join(",")}`
+    );
+    return response.data.result;
+  },
+});

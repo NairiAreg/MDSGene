@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, HStack, Text } from "@chakra-ui/react";
+import { Button, HStack } from "@chakra-ui/react";
 
 const AdvancedPagination = ({ currentPage, totalPages, onPageChange }) => {
   const getPageNumbers = () => {
