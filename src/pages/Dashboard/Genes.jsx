@@ -160,8 +160,29 @@ const data = {
   "(DBA)": {
     genes: ["GBA"],
   },
+  "(AD)": {
+    genes: ["GBA"],
+  },
+  "(CBD)": {
+    genes: ["GBA"],
+  },
+  "(GD_CBS)": {
+    genes: ["GBA"],
+  },
+  "(GD_PD_GBA)": {
+    genes: ["GBA"],
+  },
+  "(MSA)": {
+    genes: ["GBA"],
+  },
+  "(PD)": {
+    genes: ["GBA"],
+  },
+  "(PKS)": {
+    genes: ["GBA"],
+  },
   "(PARK)": {
-    genes: ["LRRK2"],
+    genes: ["LRRK2", "PARK7"],
   },
   "Chorea (CHOR)": {
     genes: ["ADCY5", "NKX2-1", "PDE10A"],

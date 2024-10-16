@@ -23,21 +23,13 @@ import {
   ModalCloseButton,
   useDisclosure,
   Badge,
-  Input,
-  InputGroup,
-  InputLeftElement,
   Menu,
   MenuButton,
   MenuList,
   MenuItem,
   Divider,
 } from "@chakra-ui/react";
-import {
-  PieChartIcon,
-  GlobeIcon,
-  SearchIcon,
-  ChevronDownIcon,
-} from "lucide-react";
+import { PieChartIcon, GlobeIcon, ChevronDownIcon } from "lucide-react";
 import MultiSelectDropdown from "components/MultiSelectDropdown";
 import SingleSelectDropdown from "components/SingleSelectDropdown";
 import { uniqueStudiesQuery, mutationDataQuery } from "api/api-service";
@@ -95,10 +87,18 @@ const Gene = () => {
     if (!data) return [];
     return data.filter(
       (study) =>
-        study.pmid.toString().includes(searchTerm) ||
-        study.study_design.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        Object.values(study.mutations).some((mutation) =>
-          mutation.toString().toLowerCase().includes(searchTerm.toLowerCase())
+        study?.pmid?.toString()?.includes(searchTerm) ||
+        study?.study_design
+          ?.toLowerCase()
+          ?.includes(searchTerm?.toLowerCase()) ||
+        study?.mutations?.some((mutationGroup) =>
+          mutationGroup.some((mutation) =>
+            mutation.type === "single"
+              ? mutation.name.toLowerCase().includes(searchTerm.toLowerCase())
+              : mutation.mutations.some((m) =>
+                  m.name.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+          )
         )
     );
   }, [data, searchTerm]);
@@ -111,13 +111,22 @@ const Gene = () => {
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
-  const handleMutationClick = async (mutP, originalMutation, pmid) => {
+  const handleMutationClick = async (
+    mutationName,
+    genotype,
+    pmid,
+    mutation
+  ) => {
     setIsModalOpen(true);
     try {
       const result = await queryClient.fetchQuery({
-        ...mutationDataQuery(disease, gene, pmid, mutP),
+        ...mutationDataQuery(disease, gene, pmid, mutationName),
       });
-      setSelectedMutationData({ data: result, originalMutation });
+      setSelectedMutationData({
+        data: result,
+        originalMutation: mutationName,
+        fullMutationData: mutation,
+      });
     } catch (error) {
       console.error("Error fetching mutation data:", error);
       setSelectedMutationData({ error: "Failed to fetch mutation data" });
@@ -167,7 +176,7 @@ const Gene = () => {
 
   if (error) return <Text>An error occurred: {error.message}</Text>;
 
-  const MutationDataDisplay = ({ data, originalMutation }) => (
+  const MutationDataDisplay = ({ data, originalMutation, fullData }) => (
     <Box>
       <Text fontSize="lg" fontWeight="bold" mb={4}>
         Mutation: {originalMutation}
@@ -244,18 +253,7 @@ const Gene = () => {
             </Box>
             <Box width="48%">
               <MultiSelectDropdown
-                options={[
-                  ...new Set(
-                    data?.flatMap((study) =>
-                      Object.entries(study.mutations)
-                        .filter(
-                          ([key, mut]) =>
-                            mut !== -99 && !key.includes("genotype")
-                        )
-                        .map(([, mut]) => mut)
-                    ) || []
-                  ),
-                ]}
+                options={data?.flatMap((study) => study.mutations) || []}
                 placeholder="Select mutations"
                 label="carrying"
                 selectedItems={selectedMutations}
@@ -304,10 +302,10 @@ const Gene = () => {
             ) : (
               <Table variant="simple" colorScheme="gray">
                 <Thead bg="gray.50">
-                  <Tr>
+                  <Tr whiteSpace="pre">
                     <Th>Study</Th>
                     <Th>Study design</Th>
-                    <Th whiteSpace="pre">N cases</Th>
+                    <Th>N cases</Th>
                     <Th>Ethnicities</Th>
                     <Th>Sex (% ♂)</Th>
                     <Th>Mean AAO (+/- SD)</Th>
@@ -319,37 +317,44 @@ const Gene = () => {
                     ?.filter(
                       ({ mutations }) =>
                         selectedMutations.length === 0 ||
-                        Object.values(mutations).some((e) =>
-                          selectedMutations?.includes(e)
+                        mutations.some((mutationGroup) =>
+                          mutationGroup.some((mutation) =>
+                            mutation.type === "single"
+                              ? selectedMutations.includes(mutation.name)
+                              : mutation.mutations.some((m) =>
+                                  selectedMutations.includes(m.name)
+                                )
+                          )
                         )
                     )
                     ?.map((study) => (
                       <Tr key={study.pmid}>
-                        <Td>
+                        <Td whiteSpace="pre">
                           <Link
                             as={RouterLink}
                             color="blue.500"
                             to={`/genes/${geneName}/${study.pmid}`}
                           >
-                            {study.pmid}
+                            {study?.author_year}
                           </Link>
                         </Td>
-                        <Td>{study.study_design}</Td>
+                        <Td textTransform="capitalize">{study.study_design}</Td>
                         <Td>{study.number_of_cases}</Td>
                         <Td>
                           {study.ethnicity !== -99 ? study.ethnicity : "N/A"}
                         </Td>
                         <Td>
-                          {(study.proportion_of_male_patients * 100).toFixed(2)}
-                          %
+                          {study.proportion_of_male_patients === -99
+                            ? "N/A"
+                            : (study.proportion_of_male_patients * 100).toFixed(
+                                2
+                              ) + "%"}
                         </Td>
                         <Td whiteSpace="pre">
                           {study.mean_age_at_onset !== -99
-                            ? `${study.mean_age_at_onset?.toFixed(2)} ${
+                            ? `${study.mean_age_at_onset} ${
                                 study.std_dev_age_at_onset
-                                  ? `\n(+/- ${study.std_dev_age_at_onset?.toFixed(
-                                      2
-                                    )})`
+                                  ? `\n(+/- ${study.std_dev_age_at_onset})`
                                   : ""
                               }`
                             : "N/A"}
@@ -361,7 +366,8 @@ const Gene = () => {
                               handleMutationClick(
                                 mutP,
                                 originalMutation,
-                                study.pmid
+                                study.pmid,
+                                study.full_mutations
                               )
                             }
                           />
@@ -409,6 +415,7 @@ const Gene = () => {
                 ) : (
                   <MutationDataDisplay
                     data={selectedMutationData.data}
+                    fullData={selectedMutationData.fullMutationData}
                     originalMutation={selectedMutationData.originalMutation}
                   />
                 )

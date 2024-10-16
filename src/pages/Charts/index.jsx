@@ -1,13 +1,6 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Box,
-  Text,
-  VStack,
-  SimpleGrid,
-  Alert,
-  AlertIcon,
-} from "@chakra-ui/react";
+import { Box, VStack, SimpleGrid, Alert, AlertIcon } from "@chakra-ui/react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import {

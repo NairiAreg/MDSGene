@@ -24,12 +24,36 @@ const MultiSelectDropdown = ({
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
 
-  const filteredOptions = options?.filter(
-    (option) =>
+  const flattenMutations = (mutations) => {
+    return mutations
+      .map((mutationGroup) => {
+        if (mutationGroup.type === "single") {
+          return mutationGroup.name;
+        } else if (mutationGroup.type === "compound_het") {
+          return mutationGroup.mutations.map((m) => m.name);
+        }
+        return [];
+      })
+      .flat();
+  };
+
+  const flattenedOptions =
+    Array.isArray(options) &&
+    options.length > 0 &&
+    typeof options[0] === "object"
+      ? flattenMutations(options)
+      : options;
+
+  const filteredOptions = flattenedOptions?.filter((option) => {
+    if (option === null || option === undefined) return false;
+    const optionString = String(option).toLowerCase();
+    const inputLower = inputValue.toLowerCase();
+    return (
       !selectedItems?.includes(option) &&
-      (option?.toLowerCase()?.includes(inputValue?.toLowerCase()) ||
-        searchCountriesByAbbr(inputValue).includes(option))
-  );
+      (optionString.includes(inputLower) ||
+        searchCountriesByAbbr(inputValue).includes(optionString))
+    );
+  });
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -112,7 +136,7 @@ const MultiSelectDropdown = ({
                 cursor="pointer"
                 onClick={() => handleItemClick(option)}
               >
-                {option}
+                {String(option)}
               </ListItem>
             ))}
           </List>
