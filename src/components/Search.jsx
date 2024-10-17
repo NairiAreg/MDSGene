@@ -86,7 +86,7 @@ const Search = ({ onSearch }) => {
       </InputGroup>
       {isFocused && (
         <Text fontSize="xs" color="gray.500" mt={1} ml={4}>
-          Search by PMID, study design, or mutations
+          Search by Study, Study design, mutations or PMID
         </Text>
       )}
     </Box>

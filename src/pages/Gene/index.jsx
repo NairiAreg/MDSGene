@@ -22,7 +22,6 @@ import {
   ModalBody,
   ModalCloseButton,
   useDisclosure,
-  Badge,
   Menu,
   MenuButton,
   MenuList,
@@ -86,22 +85,25 @@ const Gene = () => {
 
   const filteredData = useMemo(() => {
     if (!data) return [];
-    return data.filter(
-      (study) =>
-        study?.pmid?.toString()?.includes(searchTerm) ||
-        study?.study_design
-          ?.toLowerCase()
-          ?.includes(searchTerm?.toLowerCase()) ||
-        study?.mutations?.some((mutationGroup) =>
-          mutationGroup.some((mutation) =>
-            mutation.type === "single"
-              ? mutation.name.toLowerCase().includes(searchTerm.toLowerCase())
-              : mutation.mutations.some((m) =>
-                  m.name.toLowerCase().includes(searchTerm.toLowerCase())
-                )
-          )
-        )
-    );
+    return data.filter((study) => {
+      const searchTermLower = searchTerm.toLowerCase();
+      return (
+        study?.author_year?.toLowerCase().includes(searchTermLower) ||
+        study?.pmid?.toString().includes(searchTermLower) ||
+        study?.study_design?.toLowerCase().includes(searchTermLower) ||
+        study?.ethnicity?.toString().toLowerCase().includes(searchTermLower) ||
+        study?.mutations?.some((mutationGroup) => {
+          if (mutationGroup.type === "single") {
+            return mutationGroup.name.toLowerCase().includes(searchTermLower);
+          } else if (mutationGroup.type === "compound_het") {
+            return mutationGroup.mutations.some((mutation) =>
+              mutation.name.toLowerCase().includes(searchTermLower)
+            );
+          }
+          return false;
+        })
+      );
+    });
   }, [data, searchTerm]);
 
   const paginatedData = useMemo(() => {
