@@ -3,9 +3,7 @@ import { Box, Text, VStack, HStack, Link } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { publicationDataQuery } from "api/api-service";
 
-const MutationDataDisplay = ({ data }) => {
-  const mutation = data[0];
-
+const MutationDataDisplay = ({ data: mutation }) => {
   const pubmedIds = mutation.positiveFunctionalEvidence
     ? mutation.positiveFunctionalEvidence[0].split(" ")
     : [];
@@ -33,6 +31,17 @@ const MutationDataDisplay = ({ data }) => {
       }
       return null;
     });
+  };
+
+  const formatValue = (value) => {
+    if (typeof value === "object" && value !== null) {
+      return Object.entries(value).map(([key, val]) => (
+        <Text key={key}>
+          {key}: {val}
+        </Text>
+      ));
+    }
+    return value;
   };
 
   const mutationDetails = [
@@ -63,29 +72,26 @@ const MutationDataDisplay = ({ data }) => {
     { label: "Consequence", key: "consequence" },
     { label: "Pathogenicity scoring", key: "pathogenicityScoring" },
     { label: "CADD score", key: "caddScore" },
-    { label: "Phosphorylation activity", key: "phosphorylationActivity" },
+    {
+      label: "Phosphorylation activity",
+      key: "phosphorylationActivity",
+      format: formatValue,
+    },
     {
       label: "Positive functional evidence",
       key: "positiveFunctionalEvidence",
       format: formatEvidence,
     },
-    {
-      label: "Number of all included cases",
-      value: "3 homozygous (3 in total).",
-    },
   ];
 
   return (
     <Box>
-      <Text fontSize="xl" fontWeight="bold" color="red.600" mb={4}>
-        Mutation details:
-      </Text>
       <VStack align="stretch" spacing={2}>
         {mutationDetails.map((detail, index) => (
           <HStack key={index} align="flex-start">
             <Text fontWeight="bold" width="250px" flexShrink={0}>
               {detail.label}
-              {detail.suffix && !detail.value ? detail.suffix : ""}:
+              {detail.suffix && !mutation[detail.key] ? detail.suffix : ""}:
             </Text>
             {detail.isLink ? (
               <Link
@@ -98,7 +104,7 @@ const MutationDataDisplay = ({ data }) => {
             ) : detail.format ? (
               <Box>{detail.format(mutation[detail.key])}</Box>
             ) : (
-              <Text>{detail.value || mutation[detail.key] || "N/A"}</Text>
+              <Text>{formatValue(mutation[detail.key]) || "N/A"}</Text>
             )}
           </HStack>
         ))}

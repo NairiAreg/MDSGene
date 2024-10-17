@@ -123,6 +123,7 @@ const Gene = () => {
       const result = await queryClient.fetchQuery({
         ...mutationDataQuery(disease, gene, pmid, mutationName),
       });
+
       setSelectedMutationData({
         data: result,
         originalMutation: mutationName,

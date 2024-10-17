@@ -6,6 +6,7 @@ import {
   Bars,
   RotatingLines,
   Oval,
+  Circles,
 } from "react-loader-spinner";
 
 const CustomSpinner = ({
@@ -18,10 +19,11 @@ const CustomSpinner = ({
 
   const spinnerMap = {
     MG: MagnifyingGlass,
-    DNA: DNA,
-    Bars: Bars,
-    RotatingLines: RotatingLines,
-    Oval: Oval,
+    DNA,
+    Bars,
+    RotatingLines,
+    Oval,
+    Circles,
   };
 
   const SpinnerComponent = spinnerMap[type] || Oval;

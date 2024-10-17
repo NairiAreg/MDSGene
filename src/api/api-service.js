@@ -17,7 +17,6 @@ const appendFilters = (params, filters) => {
     }
   }
   if (mutations) {
-    // Check if mutations is a string, otherwise join the array
     if (typeof mutations === "string") {
       params.append("mutations", mutations);
     } else if (Array.isArray(mutations) && mutations.length > 0) {
@@ -55,6 +54,13 @@ export const mutationDataQuery = (diseaseAbbrev, gene, pmid, mutP) => ({
     const response = await axios.get(
       `${BASE_URL}/data_for_mutation?${params.toString()}`
     );
+    if (
+      typeof response.data?.[0]?.[0]?.positiveFunctionalEvidence?.[0] ===
+      "number"
+    ) {
+      response.data[0][0].positiveFunctionalEvidence[0] += "";
+    }
+
     return response.data?.[0];
   },
 });
@@ -129,5 +135,15 @@ export const publicationDataQuery = (pubmedIds) => ({
       `${BASE_URL}/search_pubmed?pubmed_ids=${pubmedIds.join(",")}`
     );
     return response.data.result;
+  },
+});
+
+export const studyDetailsQuery = (disease, gene, pmid) => ({
+  queryKey: ["studyDetails", disease, gene, pmid],
+  queryFn: async () => {
+    const response = await axios.get(
+      `${BASE_URL}/patients_for_publication?disease_abbrev=${disease}&gene=${gene}&pmid=${pmid}`
+    );
+    return response.data;
   },
 });

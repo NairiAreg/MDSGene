@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Box,
   VStack,
@@ -15,29 +14,51 @@ import {
   Button,
   Text,
   Flex,
+  Badge,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalCloseButton,
 } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { countries } from "utils/utils";
 import CustomSpinner from "components/CustomSpinner";
-
-const studyDetailsQuery = (disease, gene, pmid) => ({
-  queryKey: ["studyDetails", disease, gene, pmid],
-  queryFn: async () => {
-    const response = await axios.get(
-      `http://127.0.0.1:8000/patients_for_publication?disease_abbrev=${disease}&gene=${gene}&pmid=${pmid}`
-    );
-    return response.data;
-  },
-});
+import CollapsibleMutations from "components/CollapsibleMutations";
+import MutationDataDisplay from "components/MutationDataDisplay";
+import { studyDetailsQuery, mutationDataQuery } from "api/api-service";
 
 const StudyDetails = () => {
   const { geneName, pmid } = useParams();
   const [disease, gene] = geneName.split("-");
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const [selectedMutationData, setSelectedMutationData] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery(
     studyDetailsQuery(disease, gene, pmid)
   );
+
+  const handleMutationClick = async (mutationName, genotype) => {
+    setIsModalOpen(true);
+    try {
+      const result = await queryClient.fetchQuery({
+        ...mutationDataQuery(disease, gene, pmid, mutationName),
+      });
+      console.log({ disease, gene, pmid, mutationName, result });
+
+      setSelectedMutationData({
+        data: result,
+        originalMutation: mutationName,
+      });
+    } catch (error) {
+      console.error("Error fetching mutation data:", error);
+      setSelectedMutationData({ error: "Failed to fetch mutation data" });
+    }
+  };
 
   if (isLoading)
     return (
@@ -48,13 +69,11 @@ const StudyDetails = () => {
   if (error) return <Text>An error occurred: {error.message}</Text>;
 
   const renderSymptoms = (symptoms) => {
-    return Object.entries(symptoms)
-      .filter(([, value]) => value !== -99 && value !== "no")
-      .map(([key, value]) => (
-        <Text key={key}>
-          {key.replace(/_/g, " ").replace("sympt", "")}: {value}
-        </Text>
-      ));
+    return symptoms.map((symptom, index) => (
+      <Badge key={index} mr={1} mb={1}>
+        {symptom.replace(/_/g, " ")}
+      </Badge>
+    ));
   };
 
   return (
@@ -88,38 +107,55 @@ const StudyDetails = () => {
             {data.map((patient, index) => (
               <Tr key={index}>
                 <Td>{patient.index_patient}</Td>
-                <Td>{patient.sex}</Td>
+                <Td>{patient.sex !== "n.a." ? patient.sex : "N/A"}</Td>
                 <Td>
-                  {patient.country_of_origin !== -99
+                  {patient.country_of_origin !== "n.a."
                     ? countries[patient.country_of_origin]
                     : "N/A"}
                 </Td>
-                <Td>{patient.aao !== -99 ? patient.aao : "N/A"}</Td>
-                <Td>{patient.aae !== -99 ? patient.aae : "N/A"}</Td>
+                <Td>{patient.aao !== "n.a." ? patient.aao : "N/A"}</Td>
+                <Td>{patient.aae !== "n.a." ? patient.aae : "N/A"}</Td>
                 <Td>{renderSymptoms(patient.symptoms)}</Td>
                 <Td>
-                  {Object.entries(patient.reported_mutations)
-                    .filter(
-                      ([key, value]) =>
-                        value !== -99 && !key.includes("genotype")
-                    )
-                    .map(([key, value]) => (
-                      <Text key={key}>
-                        {value} (
-                        {
-                          patient.reported_mutations[
-                            `${key.split("_")[0]}_genotype`
-                          ]
-                        }
-                        )
-                      </Text>
-                    ))}
+                  <CollapsibleMutations
+                    mutations={patient.reported_mutations.map((mutation) => ({
+                      type: "single",
+                      name: mutation.name,
+                      genotype: mutation.genotype,
+                    }))}
+                    onMutationClick={handleMutationClick}
+                  />
                 </Td>
               </Tr>
             ))}
           </Tbody>
         </Table>
       </VStack>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        size="xl"
+      >
+        <ModalOverlay />
+        <ModalContent maxW="1000px">
+          <ModalHeader fontSize="xl" fontWeight="bold" color="red.600" mb={4}>
+            Mutation Data
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {selectedMutationData ? (
+              selectedMutationData.error ? (
+                <Text color="red.500">{selectedMutationData.error}</Text>
+              ) : (
+                <MutationDataDisplay data={selectedMutationData.data} />
+              )
+            ) : (
+              <CustomSpinner type="MG" color="#ac202d" size={200} />
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };
