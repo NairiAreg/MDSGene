@@ -112,6 +112,15 @@ const Gene = () => {
     return filteredData.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredData, currentPage, itemsPerPage, showAll]);
 
+  const mutationOptions = useMemo(() => {
+    return [
+      "Definitely pathogenic mutations",
+      "Probably pathogenic mutations",
+      "Possibly pathogenic mutations",
+      ...(data?.flatMap((study) => study.mutations) || []),
+    ];
+  }, [data]);
+
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   const handleMutationClick = async (
@@ -180,6 +189,8 @@ const Gene = () => {
 
   if (error) return <Text>An error occurred: {error.message}</Text>;
 
+  console.log(paginatedData, selectedMutations);
+
   return (
     <Box maxW="1200px" mx="auto" p={5}>
       <VStack spacing={8} align="stretch">
@@ -219,9 +230,9 @@ const Gene = () => {
             </Box>
             <Box width="48%">
               <MultiSelectDropdown
-                options={data?.flatMap((study) => study.mutations) || []}
+                options={mutationOptions}
                 placeholder="Select mutations"
-                label="carrying"
+                label="Carrying"
                 selectedItems={selectedMutations}
                 setSelectedItems={setSelectedMutations}
               />
@@ -280,17 +291,15 @@ const Gene = () => {
                 </Thead>
                 <Tbody>
                   {paginatedData
-                    ?.filter(
+                    .filter(
                       ({ mutations }) =>
                         selectedMutations.length === 0 ||
                         mutations.some((mutationGroup) =>
-                          mutationGroup.some((mutation) =>
-                            mutation.type === "single"
-                              ? selectedMutations.includes(mutation.name)
-                              : mutation.mutations.some((m) =>
-                                  selectedMutations.includes(m.name)
-                                )
-                          )
+                          mutationGroup.type === "single"
+                            ? selectedMutations.includes(mutationGroup.name)
+                            : mutationGroup.mutations.some((mutation) =>
+                                selectedMutations.includes(mutation.name)
+                              )
                         )
                     )
                     ?.map((study) => (

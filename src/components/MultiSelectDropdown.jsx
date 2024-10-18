@@ -26,23 +26,20 @@ const MultiSelectDropdown = ({
 
   const flattenMutations = (mutations) => {
     return mutations
-      .map((mutationGroup) => {
-        if (mutationGroup.type === "single") {
-          return mutationGroup.name;
-        } else if (mutationGroup.type === "compound_het") {
-          return mutationGroup.mutations.map((m) => m.name);
+      .map((mutation) => {
+        if (typeof mutation === "string") {
+          return mutation;
+        } else if (mutation.type === "single") {
+          return mutation.name;
+        } else if (mutation.type === "compound_het") {
+          return mutation.mutations.map((m) => m.name);
         }
         return [];
       })
       .flat();
   };
 
-  const flattenedOptions =
-    Array.isArray(options) &&
-    options.length > 0 &&
-    typeof options[0] === "object"
-      ? flattenMutations(options)
-      : options;
+  const flattenedOptions = flattenMutations(options);
 
   const filteredOptions = flattenedOptions?.filter((option) => {
     if (option === null || option === undefined) return false;
@@ -135,6 +132,7 @@ const MultiSelectDropdown = ({
                 _hover={{ bg: "gray.100" }}
                 cursor="pointer"
                 onClick={() => handleItemClick(option)}
+                bg={selectedItems.includes(option) ? "gray.100" : "white"}
               >
                 {String(option)}
               </ListItem>

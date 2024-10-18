@@ -99,6 +99,7 @@ const StudyDetails = () => {
               <Th>Country</Th>
               <Th>AAO</Th>
               <Th>AAE</Th>
+              <Th>Family History</Th>
               <Th>Symptoms</Th>
               <Th>Mutations</Th>
             </Tr>
@@ -115,6 +116,7 @@ const StudyDetails = () => {
                 </Td>
                 <Td>{patient.aao !== "n.a." ? patient.aao : "N/A"}</Td>
                 <Td>{patient.aae !== "n.a." ? patient.aae : "N/A"}</Td>
+                <Td>{patient.family_history}</Td>
                 <Td>{renderSymptoms(patient.symptoms)}</Td>
                 <Td>
                   <CollapsibleMutations
