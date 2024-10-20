@@ -189,8 +189,6 @@ const Gene = () => {
 
   if (error) return <Text>An error occurred: {error.message}</Text>;
 
-  console.log(paginatedData, selectedMutations);
-
   return (
     <Box maxW="1200px" mx="auto" p={5}>
       <VStack spacing={8} align="stretch">

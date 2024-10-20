@@ -147,3 +147,13 @@ export const studyDetailsQuery = (disease, gene, pmid) => ({
     return response.data;
   },
 });
+
+export const getSymptomCategories = async () => {
+  const response = await axios.get(`${BASE_URL}/symptom_categories`);
+  return response.data;
+};
+
+export const sendSymptoms = async (data) => {
+  const response = await axios.post(`${BASE_URL}/submit_symptoms`, data);
+  return response.data;
+};

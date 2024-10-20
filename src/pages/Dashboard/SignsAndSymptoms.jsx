@@ -9,8 +9,9 @@ import {
   Button,
   HStack,
 } from "@chakra-ui/react";
+import SymptomsSelector from "components/SymptomsSelector";
 
-const Introduction = () => {
+const SignsAndSymptoms = () => {
   const videoRef = useRef(null);
 
   const handlePlayPause = () => {
@@ -47,8 +48,12 @@ const Introduction = () => {
           <Button onClick={handlePlayPause}>Play/Pause</Button>
         </HStack>
       </Box>
+
+      <VStack spacing={6} align="stretch">
+        <SymptomsSelector />
+      </VStack>
     </VStack>
   );
 };
 
-export default Introduction;
+export default SignsAndSymptoms;
