@@ -70,7 +70,7 @@ const Gene = () => {
   const [selectedCountries, setSelectedCountries] = useState([]);
   const [selectedMutationData, setSelectedMutationData] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [initialMutationOptions, setInitialMutationOptions] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -113,13 +113,20 @@ const Gene = () => {
   }, [filteredData, currentPage, itemsPerPage, showAll]);
 
   const mutationOptions = useMemo(() => {
-    return [
-      "Definitely pathogenic mutations",
-      "Probably pathogenic mutations",
-      "Possibly pathogenic mutations",
-      ...(data?.flatMap((study) => study.mutations) || []),
+    if (initialMutationOptions) return initialMutationOptions;
+
+    if (!data) return [];
+
+    const newOptions = [
+      "definitely pathogenic",
+      "probably pathogenic",
+      "possibly pathogenic",
+      ...(data.flatMap((study) => study.mutations) || []),
     ];
-  }, [data]);
+
+    setInitialMutationOptions(newOptions);
+    return newOptions;
+  }, [data, initialMutationOptions]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
@@ -289,17 +296,17 @@ const Gene = () => {
                 </Thead>
                 <Tbody>
                   {paginatedData
-                    .filter(
-                      ({ mutations }) =>
-                        selectedMutations.length === 0 ||
-                        mutations.some((mutationGroup) =>
-                          mutationGroup.type === "single"
-                            ? selectedMutations.includes(mutationGroup.name)
-                            : mutationGroup.mutations.some((mutation) =>
-                                selectedMutations.includes(mutation.name)
-                              )
-                        )
-                    )
+                    // .filter(
+                    //   ({ mutations }) =>
+                    //     selectedMutations.length === 0 ||
+                    //     mutations.some((mutationGroup) =>
+                    //       mutationGroup.type === "single"
+                    //         ? selectedMutations.includes(mutationGroup.name)
+                    //         : mutationGroup.mutations.some((mutation) =>
+                    //             selectedMutations.includes(mutation.name)
+                    //           )
+                    //     )
+                    // )
                     ?.map((study) => (
                       <Tr key={study.pmid}>
                         <Td whiteSpace="pre">
