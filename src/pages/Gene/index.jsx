@@ -117,10 +117,19 @@ const Gene = () => {
 
     if (!data) return [];
 
+    // Extract unique pathogenicity values from mutations
+    const pathogenicityValues = new Set();
+    data.forEach((study) => {
+      study.mutations.forEach((mutation) => {
+        if (mutation.pathogenicity) {
+          pathogenicityValues.add(mutation.pathogenicity);
+        }
+      });
+    });
+
+    // Combine pathogenicity values with mutations
     const newOptions = [
-      "definitely pathogenic",
-      "probably pathogenic",
-      "possibly pathogenic",
+      ...Array.from(pathogenicityValues), // Include unique pathogenicity values
       ...(data.flatMap((study) => study.mutations) || []),
     ];
 
