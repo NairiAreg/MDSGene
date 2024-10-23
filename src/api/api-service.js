@@ -118,11 +118,53 @@ export const reporterSignsSymptomsResponseQuery = createFilteredQuery(
     if (!data) {
       return null;
     }
-    data.plotOptions.series.dataLabels.formatter = eval(
-      `(${data.plotOptions.series.dataLabels.formatter.__function})`
-    );
-    data.tooltip.formatter = eval(`(${data.tooltip.formatter.__function})`);
-    return data;
+
+    if (Array.isArray(data)) {
+      return data.map((chartGroup) => ({
+        name: chartGroup.name,
+        chartConfig: {
+          ...chartGroup.chartConfig,
+          plotOptions: {
+            ...chartGroup.chartConfig.plotOptions,
+            series: {
+              ...chartGroup.chartConfig.plotOptions.series,
+              dataLabels: {
+                ...chartGroup.chartConfig.plotOptions.series.dataLabels,
+                formatter: eval(
+                  `(${chartGroup.chartConfig.plotOptions.series.dataLabels.formatter.__function})`
+                ),
+              },
+            },
+          },
+          tooltip: {
+            ...chartGroup.chartConfig.tooltip,
+            formatter: eval(
+              `(${chartGroup.chartConfig.tooltip.formatter.__function})`
+            ),
+          },
+        },
+      }));
+    }
+
+    return {
+      ...data,
+      plotOptions: {
+        ...data.plotOptions,
+        series: {
+          ...data.plotOptions.series,
+          dataLabels: {
+            ...data.plotOptions.series.dataLabels,
+            formatter: eval(
+              `(${data.plotOptions.series.dataLabels.formatter.__function})`
+            ),
+          },
+        },
+      },
+      tooltip: {
+        ...data.tooltip,
+        formatter: eval(`(${data.tooltip.formatter.__function})`),
+      },
+    };
   }
 );
 
