@@ -32,7 +32,7 @@ import { PieChartIcon, GlobeIcon, ChevronDownIcon } from "lucide-react";
 import MultiSelectDropdown from "components/MultiSelectDropdown";
 import SingleSelectDropdown from "components/SingleSelectDropdown";
 import { uniqueStudiesQuery, mutationDataQuery } from "api/api-service";
-import { countries, filterOptions } from "utils/utils";
+import { countries, filterOptions, mapperForGeneDiseaseAbbr } from "utils/utils";
 import CollapsibleMutations from "components/CollapsibleMutations";
 import CustomSpinner from "components/CustomSpinner";
 import Charts from "../Charts";
@@ -214,7 +214,7 @@ const Gene = () => {
       <VStack spacing={8} align="stretch">
         <Flex justifyContent="space-between" alignItems="center">
           <Heading as="h1" size="xl" color="red.700">
-            Overview of included studies for {geneName}:
+            Overview of included studies for {mapperForGeneDiseaseAbbr(geneName)}:
           </Heading>
           <Flex gap={4}>
             <Button
