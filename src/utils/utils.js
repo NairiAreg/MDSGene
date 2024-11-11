@@ -233,7 +233,7 @@ export const mapperForGeneDiseaseAbbr = (str) => {
     "DLB_AD_GBA-GBA":
       "PARK-GBA1: Dementia with Lewy bodies + Alzheimer's disease",
     "CBD-GBA": "PARK-GBA1: Corticobasal syndrome  ",
-    "PSP_GBA-GBA": "PARK-GBA1: Progressive supranuclear palsy",
+    "GBA_PSP-GBA": "PARK-GBA1: Progressive supranuclear palsy",
     "MSA-GBA": "PARK-GBA1: Multiple system atrophy",
   };
 
