@@ -221,19 +221,19 @@ export const formatMutations = (mutations) => {
 
 export const mapperForGeneDiseaseAbbr = (str) => {
   const mapper = {
-    "OTHER-GBA_GBA":
+    "DBA-GBA": "PARK-GBA1: Dementia with Lewy bodies",
+    "PD-GBA": "PARK-GBA1: Parkinson’s disease",
+    "OTHER_GBA-GBA":
       "PARK-GBA1: Frontotemporal dementia + Posterior cortical atrophy",
     "PKS-GBA": "PARK-GBA1: Parkinsonism (unspecified type)",
-    "GD-CBS-GBA": "PARK-GBA1: Gaucher disease + Corticobasal syndrome",
-    "GD-DLB-GBA": "PARK-GBA1: Gaucher disease +  Dementia with Lewy bodies",
+    "GD_CBS-GBA": "PARK-GBA1: Gaucher disease + Corticobasal syndrome",
+    "GD_DLB-GBA": "PARK-GBA1: Gaucher disease +  Dementia with Lewy bodies",
     "AD-GBA": "PARK-GBA1: Alzheimer's disease",
-    "PD-GBA": "PARK-GBA1: Parkinson’s disease",
-    "DBA-GBA": "PARK-GBA1: Dementia with Lewy bodies",
-    "GD-PD-GBA-GBA": "PARK-GBA1: Gaucher disease + Parkinson’s disease",
-    "DLB-AD-GBA-GBA":
+    "GD_PD_GBA-GBA": "PARK-GBA1: Gaucher disease + Parkinson’s disease",
+    "DLB_AD_GBA-GBA":
       "PARK-GBA1: Dementia with Lewy bodies + Alzheimer's disease",
     "CBD-GBA": "PARK-GBA1: Corticobasal syndrome  ",
-    "PSP-GBA-GBA": "PARK-GBA1: Progressive supranuclear palsy",
+    "PSP_GBA-GBA": "PARK-GBA1: Progressive supranuclear palsy",
     "MSA-GBA": "PARK-GBA1: Multiple system atrophy",
   };
 
