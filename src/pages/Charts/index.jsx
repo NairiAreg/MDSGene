@@ -58,13 +58,30 @@ const ChartWrapper = ({ id, queryFn, styles }) => {
     );
   }
 
-  if (!data) {
+  console.log(
+    !data?.series?.[0]?.data?.length,
+    data,
+    queryFn?.queryKey?.[0],
+    id
+  );
+
+  if (
+    !data ||
+    ([
+      "levodopaResponseChart",
+      "countryPieChart",
+      "ethnicityPieChart",
+      "initialSignsAndSymptomsChart",
+    ].includes(id) &&
+      !data?.series?.[0]?.data?.length)
+  ) {
     return (
-      <Alert status="info">
-        <AlertIcon />
-        No data available for this chart with current filters. Try changing or
-        removing filters
-      </Alert>
+      <></>
+      // <Alert status="info">
+      //   <AlertIcon />
+      //   No data available for this chart with current filters. Try changing or
+      //   removing filters
+      // </Alert>
     );
   }
 
