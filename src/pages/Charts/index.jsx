@@ -27,10 +27,7 @@ const calculateChartHeight = (chartData, id) => {
   if (chartData.xAxis?.categories) {
     const categoryCount = chartData.xAxis.categories.length;
     // Special handling for symptoms charts
-    if (
-      id === "reporterSignsSymptomsRChart" ||
-      id === "initialSignsAndSymptomsChart"
-    ) {
+    if (id === "reporterSignsSymptomsRChart") {
       return `${Math.max(400, categoryCount * 60)}px`;
     }
   }
