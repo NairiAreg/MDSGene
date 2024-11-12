@@ -17,6 +17,11 @@ import CustomSpinner from "components/CustomSpinner";
 // Initialize the map module
 highchartsMap(Highcharts);
 
+const truncateText = (text, maxLength = 25) => {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + "...";
+};
+
 const ChartWrapper = ({ id, options, styles, isWorldMap = false }) => {
   useEffect(() => {
     if (isWorldMap && options) {
@@ -55,6 +60,30 @@ const ChartWrapper = ({ id, options, styles, isWorldMap = false }) => {
       ...options.chart,
       height: styles?.height || "400px",
     },
+    // Add tooltip formatter to show full text on hover
+    tooltip: {
+      ...options.tooltip,
+      formatter: function () {
+        return `<b>${this.point.name}</b>: ${this.percentage.toFixed(1)}%`;
+      },
+    },
+    plotOptions: {
+      ...options.plotOptions,
+      pie: {
+        ...options.plotOptions?.pie,
+        dataLabels: {
+          ...options.plotOptions?.pie?.dataLabels,
+          formatter: function () {
+            return truncateText(this.point.name);
+          },
+          style: {
+            ...options.plotOptions?.pie?.dataLabels?.style,
+            fontSize: "14px",
+            textOverflow: "ellipsis",
+          },
+        },
+      },
+    },
   };
 
   return (
@@ -84,14 +113,18 @@ const WorldMap = ({ geneName, filters }) => {
             chart: {
               ...chartData.chart,
               height: 600,
-              width: null, // Allow the chart to fill the container width
+              width: null,
             },
             title: {
               ...chartData.title,
               style: {
                 ...chartData.title.style,
-                fontSize: "16px", // Increase title font size
+                fontSize: "16px",
               },
+            },
+            // Add tooltip configuration
+            tooltip: {
+              pointFormat: "<b>{point.name}</b>: {point.percentage:.1f}%",
             },
             plotOptions: {
               ...chartData.plotOptions,
@@ -101,7 +134,8 @@ const WorldMap = ({ geneName, filters }) => {
                   ...chartData.plotOptions?.pie?.dataLabels,
                   style: {
                     ...chartData.plotOptions?.pie?.dataLabels?.style,
-                    fontSize: "14px", // Increase data label font size
+                    fontSize: "14px",
+                    textOverflow: "ellipsis",
                   },
                 },
               },

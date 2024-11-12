@@ -8,7 +8,9 @@ const CollapsibleMutations = ({ mutations, onMutationClick }) => {
 
   const renderMutation = (mutation, index, isCompoundHet = false) => {
     const handleClick = () => {
-      onMutationClick(mutation.name, mutation.genotype);
+      if (mutation.name !== "n.a.") {
+        onMutationClick(mutation.name, mutation.genotype);
+      }
     };
 
     return (
