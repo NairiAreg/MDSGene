@@ -173,6 +173,7 @@ export const worldMapChartQuery = createFilteredQuery("world_map");
 export const publicationDataQuery = (pubmedIds) => ({
   queryKey: ["publicationData", pubmedIds],
   queryFn: async () => {
+    if (!pubmedIds.length) return {};
     const response = await axios.get(
       `${BASE_URL}/search_pubmed?pubmed_ids=${pubmedIds.join(",")}`
     );

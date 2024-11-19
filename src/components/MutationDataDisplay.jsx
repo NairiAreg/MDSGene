@@ -4,19 +4,22 @@ import { useQuery } from "@tanstack/react-query";
 import { publicationDataQuery } from "api/api-service";
 
 const MutationDataDisplay = ({ data: mutation }) => {
-  const pubmedIds = mutation.positiveFunctionalEvidence
-    ? mutation.positiveFunctionalEvidence[0].split(" ")
-    : [];
-  const { data: publicationData } = useQuery(publicationDataQuery(pubmedIds));
+  const pubmedIds = mutation.positiveFunctionalEvidence?.[0]?.split(" ") ?? [];
 
+  const { data: publicationData = {} } = useQuery({
+    ...publicationDataQuery(pubmedIds),
+    enabled: pubmedIds.length > 0,
+  });
   const formatEvidence = (evidence) => {
     if (!evidence || evidence.length === 0) return "N/A";
-    const pubmedIds = evidence[0].split(" ");
-    return pubmedIds.map((id) => {
-      const publication = publicationData?.[id];
-      if (publication) {
-        const author = publication.sortfirstauthor.split(" ")[0];
-        const year = publication.pubdate.split(" ")[0];
+    return pubmedIds
+      .map((id) => {
+        const publication = publicationData[id];
+        if (!publication) return null;
+
+        const author = publication.sortfirstauthor?.split(" ")[0] ?? "Unknown";
+        const year = publication.pubdate?.split(" ")[0] ?? "N/A";
+
         return (
           <Link
             key={id}
@@ -28,16 +31,16 @@ const MutationDataDisplay = ({ data: mutation }) => {
             {`${author}, ${year}`}
           </Link>
         );
-      }
-      return null;
-    });
+      })
+      .filter(Boolean); // Remove null values
   };
 
   const formatValue = (value) => {
+    if (!value) return "N/A";
     if (typeof value === "object" && value !== null) {
       return Object.entries(value).map(([key, val]) => (
         <Text key={key}>
-          {key}: {val}
+          {key}: {val ?? "N/A"}
         </Text>
       ));
     }
@@ -62,7 +65,10 @@ const MutationDataDisplay = ({ data: mutation }) => {
       label: "Reference, alternative allele",
       key: "referenceAlternativeAllele",
     },
-    { label: `Genomic location hg(${mutation.hg})`, key: "genomicLocation" },
+    {
+      label: `Genomic location hg(${mutation.hg ?? "N/A"})`,
+      key: "genomicLocation",
+    },
     {
       label: "Gene name",
       key: "geneName",
@@ -93,7 +99,7 @@ const MutationDataDisplay = ({ data: mutation }) => {
               {detail.label}
               {detail.suffix && !mutation[detail.key] ? detail.suffix : ""}:
             </Text>
-            {detail.isLink ? (
+            {detail.isLink && mutation[detail.key] ? (
               <Link
                 href={detail.linkGenerator(mutation[detail.key])}
                 color="blue.500"
@@ -104,7 +110,7 @@ const MutationDataDisplay = ({ data: mutation }) => {
             ) : detail.format ? (
               <Box>{detail.format(mutation[detail.key])}</Box>
             ) : (
-              <Text>{formatValue(mutation[detail.key]) || "N/A"}</Text>
+              <Text>{formatValue(mutation[detail.key])}</Text>
             )}
           </HStack>
         ))}
