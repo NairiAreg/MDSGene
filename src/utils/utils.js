@@ -222,7 +222,7 @@ export const formatMutations = (mutations) => {
 export const mapperForGeneDiseaseAbbr = (str) => {
   const mapper = {
     "DBA-GBA": "PARK-GBA1: Dementia with Lewy bodies",
-    "PD-GBA": "PARK-GBA1: Parkinson’s disease",
+    "PD-GBA": "PARK-GBA1",
     "OTHER_GBA-GBA":
       "PARK-GBA1: Frontotemporal dementia + Posterior cortical atrophy",
     "PKS-GBA": "PARK-GBA1: Parkinsonism (unspecified type)",

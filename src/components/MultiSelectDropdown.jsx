@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { ChevronDownIcon } from "@chakra-ui/icons"; // Добавляем импорт
 import {
   Box,
   Input,
@@ -9,7 +10,9 @@ import {
   TagLabel,
   Flex,
   Text,
-} from "@chakra-ui/react";
+  InputGroup,
+  InputRightElement,
+} from "@chakra-ui/react"; // Добавляем InputGroup и InputRightElement
 import { searchCountriesByAbbr } from "utils/utils";
 
 const MultiSelectDropdown = ({
@@ -87,7 +90,7 @@ const MultiSelectDropdown = ({
 
   return (
     <Box width="100%" position="relative">
-      <Text mb={2}>{label}</Text>
+      <Text mb={0}>{label}</Text>
       <Box ref={dropdownRef}>
         <Flex flexWrap="wrap" mb={2}>
           {selectedItems.map((item) => (
@@ -105,6 +108,7 @@ const MultiSelectDropdown = ({
             </Tag>
           ))}
         </Flex>
+        <InputGroup>
         <Input
           ref={inputRef}
           placeholder={placeholder}
@@ -112,6 +116,14 @@ const MultiSelectDropdown = ({
           onChange={handleInputChange}
           onClick={handleInputClick}
         />
+          <InputRightElement
+              right="0.35rem"
+              cursor="pointer" // Добавляем курсор-pointer чтобы показать что элемент кликабельный
+              onClick={() => setIsOpen(!isOpen)} // Добавляем обработчик клика
+          >
+            <ChevronDownIcon />
+          </InputRightElement>
+        </InputGroup>
         {isOpen && (
           <List
             position="absolute"

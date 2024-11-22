@@ -214,7 +214,7 @@ const Gene = () => {
       <VStack spacing={8} align="stretch">
         <Flex justifyContent="space-between" alignItems="center">
           <Heading as="h1" size="xl" color="red.700">
-            Overview of included studies for {mapperForGeneDiseaseAbbr(geneName)}:
+            Overview of included studies for <br/>{mapperForGeneDiseaseAbbr(geneName)}
           </Heading>
           <Flex gap={4}>
             <Button

@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useRef, useEffect } from "react";
+import { ChevronDownIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
@@ -72,6 +73,7 @@ const SingleSelectDropdown = ({ options, placeholder, label, onChange }) => {
           borderColor="gray.200"
           _hover={{ bg: "gray.50" }}
           mr={showAgeInput ? 2 : 0}
+          rightIcon={<ChevronDownIcon />}  // Add this line
         >
           {selectedItem || placeholder}
         </Button>

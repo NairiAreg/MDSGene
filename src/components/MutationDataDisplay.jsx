@@ -82,6 +82,7 @@ const MutationDataDisplay = ({ data: mutation }) => {
       label: "Phosphorylation activity",
       key: "phosphorylationActivity",
       format: formatValue,
+      condition: mutation.geneName === "LRRK2",
     },
     {
       label: "Positive functional evidence",
@@ -93,7 +94,7 @@ const MutationDataDisplay = ({ data: mutation }) => {
   return (
     <Box>
       <VStack align="stretch" spacing={2}>
-        {mutationDetails.map((detail, index) => (
+        {mutationDetails.map((detail, index) => (detail.condition === undefined || detail.condition) && (
           <HStack key={index} align="flex-start">
             <Text fontWeight="bold" width="250px" flexShrink={0}>
               {detail.label}

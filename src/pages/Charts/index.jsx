@@ -101,9 +101,6 @@ const ChartWrapper = ({ id, queryFn, styles }) => {
 
           return (
             <Box key={`${id}-${index}`} width="100%">
-              <Text fontSize="lg" fontWeight="bold" mb={4} color="gray.700">
-                {chartData.name}
-              </Text>
               <Box height={calculatedHeight}>
                 <HighchartsReact
                   highcharts={Highcharts}
