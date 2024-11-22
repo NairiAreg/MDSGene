@@ -4,13 +4,17 @@ import { useQuery } from "@tanstack/react-query";
 import { publicationDataQuery } from "api/api-service";
 
 const MutationDataDisplay = ({ data: mutation }) => {
-  const pubmedIds = mutation.positiveFunctionalEvidence?.[0]?.split(" ") ?? [];
+  const pubmedIds =
+    mutation.positiveFunctionalEvidence?.[0]
+      ?.replaceAll(", ", " ")
+      ?.split(" ") ?? [];
 
   const { data: publicationData = {} } = useQuery({
     ...publicationDataQuery(pubmedIds),
     enabled: pubmedIds.length > 0,
   });
   const formatEvidence = (evidence) => {
+    if (!publicationData) return;
     if (!evidence || evidence.length === 0) return "N/A";
     return pubmedIds
       .map((id) => {
@@ -94,27 +98,30 @@ const MutationDataDisplay = ({ data: mutation }) => {
   return (
     <Box>
       <VStack align="stretch" spacing={2}>
-        {mutationDetails.map((detail, index) => (detail.condition === undefined || detail.condition) && (
-          <HStack key={index} align="flex-start">
-            <Text fontWeight="bold" width="250px" flexShrink={0}>
-              {detail.label}
-              {detail.suffix && !mutation[detail.key] ? detail.suffix : ""}:
-            </Text>
-            {detail.isLink && mutation[detail.key] ? (
-              <Link
-                href={detail.linkGenerator(mutation[detail.key])}
-                color="blue.500"
-                isExternal
-              >
-                {mutation[detail.key]}
-              </Link>
-            ) : detail.format ? (
-              <Box>{detail.format(mutation[detail.key])}</Box>
-            ) : (
-              <Text>{formatValue(mutation[detail.key])}</Text>
-            )}
-          </HStack>
-        ))}
+        {mutationDetails.map(
+          (detail, index) =>
+            (detail.condition === undefined || detail.condition) && (
+              <HStack key={index} align="flex-start">
+                <Text fontWeight="bold" width="250px" flexShrink={0}>
+                  {detail.label}
+                  {detail.suffix && !mutation[detail.key] ? detail.suffix : ""}:
+                </Text>
+                {detail.isLink && mutation[detail.key] ? (
+                  <Link
+                    href={detail.linkGenerator(mutation[detail.key])}
+                    color="blue.500"
+                    isExternal
+                  >
+                    {mutation[detail.key]}
+                  </Link>
+                ) : detail.format ? (
+                  <Box>{detail.format(mutation[detail.key])}</Box>
+                ) : (
+                  <Text>{formatValue(mutation[detail.key])}</Text>
+                )}
+              </HStack>
+            )
+        )}
       </VStack>
     </Box>
   );

@@ -61,7 +61,7 @@ export const mutationDataQuery = (diseaseAbbrev, gene, pmid, mutP) => ({
       response.data[0][0].positiveFunctionalEvidence[0] += "";
     }
 
-    return response.data?.[0];
+    return response.data?.[0] || [];
   },
 });
 

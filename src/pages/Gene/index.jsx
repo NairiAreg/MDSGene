@@ -32,7 +32,11 @@ import { PieChartIcon, GlobeIcon, ChevronDownIcon } from "lucide-react";
 import MultiSelectDropdown from "components/MultiSelectDropdown";
 import SingleSelectDropdown from "components/SingleSelectDropdown";
 import { uniqueStudiesQuery, mutationDataQuery } from "api/api-service";
-import { countries, filterOptions, mapperForGeneDiseaseAbbr } from "utils/utils";
+import {
+  countries,
+  filterOptions,
+  mapperForGeneDiseaseAbbr,
+} from "utils/utils";
 import CollapsibleMutations from "components/CollapsibleMutations";
 import CustomSpinner from "components/CustomSpinner";
 import Charts from "../Charts";
@@ -214,7 +218,8 @@ const Gene = () => {
       <VStack spacing={8} align="stretch">
         <Flex justifyContent="space-between" alignItems="center">
           <Heading as="h1" size="xl" color="red.700">
-            Overview of included studies for <br/>{mapperForGeneDiseaseAbbr(geneName)}
+            Overview of included studies for <br />
+            {mapperForGeneDiseaseAbbr(geneName)}
           </Heading>
           <Flex gap={4}>
             <Button
@@ -308,53 +313,63 @@ const Gene = () => {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {paginatedData?.map((study) => (
-                    <Tr key={study.pmid}>
-                      <Td whiteSpace="pre">
-                        <Link
-                          as={RouterLink}
-                          color="blue.500"
-                          to={`/genes/${geneName}/${study.pmid}`}
-                        >
-                          {study?.author_year}
-                        </Link>
-                      </Td>
-                      <Td textTransform="capitalize">{study.study_design}</Td>
-                      <Td>{study.number_of_cases}</Td>
-                      <Td>
-                        {study.ethnicity !== -99 ? study.ethnicity : "N/A"}
-                      </Td>
-                      <Td>
-                        {study.proportion_of_male_patients === -99
-                          ? "N/A"
-                          : (study.proportion_of_male_patients * 100).toFixed(
-                              2
-                            ) + "%"}
-                      </Td>
-                      <Td whiteSpace="pre">
-                        {study.mean_age_at_onset !== -99
-                          ? `${study.mean_age_at_onset} ${
-                              study.std_dev_age_at_onset
-                                ? `\n(+/- ${study.std_dev_age_at_onset})`
-                                : ""
-                            }`
-                          : "N/A"}
-                      </Td>
-                      <Td>
-                        <CollapsibleMutations
-                          mutations={study.mutations}
-                          onMutationClick={(mutP, originalMutation) =>
-                            handleMutationClick(
-                              mutP,
-                              originalMutation,
-                              study.pmid,
-                              study.full_mutations
-                            )
-                          }
-                        />
+                  {paginatedData?.length > 0 ? (
+                    paginatedData.map((study) => (
+                      <Tr key={study.pmid}>
+                        <Td whiteSpace="pre">
+                          <Link
+                            as={RouterLink}
+                            color="blue.500"
+                            to={`/genes/${geneName}/${study.pmid}`}
+                          >
+                            {study?.author_year}
+                          </Link>
+                        </Td>
+                        <Td textTransform="capitalize">{study.study_design}</Td>
+                        <Td>{study.number_of_cases}</Td>
+                        <Td>
+                          {study.ethnicity !== -99 ? study.ethnicity : "N/A"}
+                        </Td>
+                        <Td>
+                          {study.proportion_of_male_patients === -99
+                            ? "N/A"
+                            : (study.proportion_of_male_patients * 100).toFixed(
+                                2
+                              ) + "%"}
+                        </Td>
+                        <Td whiteSpace="pre">
+                          {study.mean_age_at_onset !== -99
+                            ? `${study.mean_age_at_onset} ${
+                                study.std_dev_age_at_onset
+                                  ? `\n(+/- ${study.std_dev_age_at_onset})`
+                                  : ""
+                              }`
+                            : "N/A"}
+                        </Td>
+                        <Td>
+                          <CollapsibleMutations
+                            mutations={study.mutations}
+                            onMutationClick={(mutP, originalMutation) =>
+                              handleMutationClick(
+                                mutP,
+                                originalMutation,
+                                study.pmid,
+                                study.full_mutations
+                              )
+                            }
+                          />
+                        </Td>
+                      </Tr>
+                    ))
+                  ) : (
+                    <Tr>
+                      <Td colSpan={7} textAlign="center" py={8}>
+                        <Text fontSize="lg" color="gray.500">
+                          No results found
+                        </Text>
                       </Td>
                     </Tr>
-                  ))}
+                  )}
                 </Tbody>
               </Table>
             )}
