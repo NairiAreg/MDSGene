@@ -254,7 +254,7 @@ const Gene = () => {
             <Box width="48%">
               <MultiSelectDropdown
                 options={mutationOptions}
-                placeholder="Select mutations"
+                placeholder="Select variant"
                 label="Carrying"
                 selectedItems={selectedMutations}
                 setSelectedItems={setSelectedMutations}
@@ -328,7 +328,7 @@ const Gene = () => {
                         <Td textTransform="capitalize">{study.study_design}</Td>
                         <Td>{study.number_of_cases}</Td>
                         <Td>
-                          {study.ethnicity !== -99 ? study.ethnicity : "N/A"}
+						{study.ethnicity && study.ethnicity !== -99 ? study.ethnicity.charAt(0).toUpperCase() + study.ethnicity.slice(1) : "N/A"}
                         </Td>
                         <Td>
                           {study.proportion_of_male_patients === -99
@@ -422,7 +422,7 @@ const Gene = () => {
         <Modal isOpen={isChartsOpen} onClose={onChartsClose} size="full">
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader>Charts for {geneName}</ModalHeader>
+            <ModalHeader>Charts for {mapperForGeneDiseaseAbbr(geneName)}</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               <Charts geneName={geneName} filters={getFilterParams()} />
@@ -433,7 +433,7 @@ const Gene = () => {
         <Modal isOpen={isWorldMapOpen} onClose={onWorldMapClose} size="full">
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader>World Map for {geneName}</ModalHeader>
+            <ModalHeader>World Map for {mapperForGeneDiseaseAbbr(geneName)}</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               <WorldMap geneName={geneName} filters={getFilterParams()} />
