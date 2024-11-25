@@ -150,6 +150,10 @@ const Gene = () => {
     mutation
   ) => {
     setIsModalOpen(true);
+    const maxRetries = 3;
+    const retryDelay = 500;
+
+    const fetchWithRetry = async (attempt = 0) => {
     try {
       const result = await queryClient.fetchQuery({
         ...mutationDataQuery(disease, gene, pmid, mutationName),
@@ -161,9 +165,16 @@ const Gene = () => {
         fullMutationData: mutation,
       });
     } catch (error) {
-      console.error("Error fetching mutation data:", error);
-      setSelectedMutationData({ error: "Failed to fetch mutation data" });
+        console.error(`Attempt ${attempt + 1} failed:`, error);
+        if (attempt < maxRetries) {
+          setTimeout(() => fetchWithRetry(attempt + 1), retryDelay);
+        } else {
+          setSelectedMutationData({ error: "Failed to fetch mutation data after 3 attempts" });
     }
+      }
+    };
+
+    fetchWithRetry();
   };
 
   useEffect(() => {

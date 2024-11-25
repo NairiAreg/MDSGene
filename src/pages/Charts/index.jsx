@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Box,
@@ -6,8 +6,6 @@ import {
   SimpleGrid,
   Alert,
   AlertIcon,
-  Text,
-  Divider,
 } from "@chakra-ui/react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
@@ -23,19 +21,60 @@ import {
 import CustomSpinner from "components/CustomSpinner";
 
 const calculateChartHeight = (chartData, id) => {
-  // Calculate height for bar charts with categories
-  if (chartData.xAxis?.categories) {
+  if (chartData?.xAxis?.categories) {
     const categoryCount = chartData.xAxis.categories.length;
-    // Special handling for symptoms charts
     if (id === "reporterSignsSymptomsRChart") {
       return `${Math.max(400, categoryCount * 60)}px`;
     }
   }
-  return "400px"; // Default height for other charts
+  return "400px";
 };
 
 const ChartWrapper = ({ id, queryFn, styles }) => {
-  const { data, isLoading, error } = useQuery(queryFn);
+  const { data, isLoading, error } = useQuery({
+    ...queryFn,
+    staleTime: Infinity, // Предотвращаем автоматическое обновление
+    cacheTime: Infinity, // Храним данные в кеше
+  });
+
+  // Мемоизируем опции графика
+  const chartOptions = useMemo(() => {
+    if (!data) return null;
+
+    if (Array.isArray(data)) {
+      return data.map(chartData => ({
+        ...chartData.chartConfig,
+        chart: {
+          ...chartData.chartConfig.chart,
+          height: calculateChartHeight(chartData.chartConfig, id),
+          animation: false, // Отключаем анимацию
+        },
+        plotOptions: {
+          ...chartData.chartConfig.plotOptions,
+          series: {
+            ...chartData.chartConfig.plotOptions?.series,
+            animation: false, // Отключаем анимацию для серий
+          }
+        }
+      }));
+    }
+
+    return {
+      ...data,
+      chart: {
+        ...data.chart,
+        height: calculateChartHeight(data, id),
+        animation: false,
+      },
+      plotOptions: {
+        ...data.plotOptions,
+        series: {
+          ...data.plotOptions?.series,
+          animation: false,
+        }
+      }
+    };
+  }, [data, id]);
 
   if (isLoading) {
     return (
@@ -46,7 +85,6 @@ const ChartWrapper = ({ id, queryFn, styles }) => {
   }
 
   if (error) {
-    console.log(id, data);
     return (
       <Alert status="error">
         <AlertIcon />
@@ -54,13 +92,6 @@ const ChartWrapper = ({ id, queryFn, styles }) => {
       </Alert>
     );
   }
-
-  console.log(
-    !data?.series?.[0]?.data?.length,
-    data,
-    queryFn?.queryKey?.[0],
-    id
-  );
 
   if (
     !data ||
@@ -72,62 +103,34 @@ const ChartWrapper = ({ id, queryFn, styles }) => {
     ].includes(id) &&
       !data?.series?.[0]?.data?.length)
   ) {
-    return (
-      <></>
-      // <Alert status="info">
-      //   <AlertIcon />
-      //   No data available for this chart with current filters. Try changing or
-      //   removing filters
-      // </Alert>
-    );
+    return null;
   }
 
-  // Handle both single chart config and array of chart configs
-  if (Array.isArray(data)) {
+  if (Array.isArray(chartOptions)) {
     return (
       <VStack spacing={8} align="stretch" width="100%">
-        {data.map((chartData, index) => {
-          const calculatedHeight = calculateChartHeight(
-            chartData.chartConfig,
-            id
-          );
-          const chartOptions = {
-            ...chartData.chartConfig,
-            chart: {
-              ...chartData.chartConfig.chart,
-              height: calculatedHeight,
-            },
-          };
-
-          return (
+        {chartOptions.map((options, index) => (
             <Box key={`${id}-${index}`} width="100%">
-              <Box height={calculatedHeight}>
+            <Box height={options.chart.height}>
                 <HighchartsReact
                   highcharts={Highcharts}
-                  options={chartOptions}
+                options={options}
+                updateArgs={[true, true, true]} // Принудительное обновление
                 />
               </Box>
-              {index < data.length - 1 && <Divider mt={8} />}
             </Box>
-          );
-        })}
+        ))}
       </VStack>
     );
   }
 
-  // Handle single chart config (for backward compatibility)
-  const calculatedHeight = calculateChartHeight(data, id);
-  const chartOptions = {
-    ...data,
-    chart: {
-      ...data.chart,
-      height: calculatedHeight,
-    },
-  };
-
   return (
-    <Box id={id} width="100%" height={calculatedHeight} {...styles}>
-      <HighchartsReact highcharts={Highcharts} options={chartOptions} />
+    <Box id={id} width="100%" height={chartOptions.chart.height} {...styles}>
+      <HighchartsReact
+        highcharts={Highcharts}
+        options={chartOptions}
+        updateArgs={[true, true, true]}
+      />
     </Box>
   );
 };
@@ -135,13 +138,11 @@ const ChartWrapper = ({ id, queryFn, styles }) => {
 const Charts = ({ geneName, filters }) => {
   const [disease, gene] = geneName.split("-");
 
-  const chartConfigs = [
+  const chartConfigs = useMemo(() => [
     {
       id: "reporterSignsSymptomsRChart",
       queryFn: reporterSignsSymptomsResponseQuery(disease, gene, filters),
-      styles: {
-        width: "100%",
-      },
+      styles: { width: "100%" },
     },
     {
       id: "aaoDistributionChart",
@@ -167,7 +168,7 @@ const Charts = ({ geneName, filters }) => {
       id: "countryPieChart",
       queryFn: countryPieChartQuery(disease, gene, filters),
     },
-  ];
+  ], [disease, gene, filters]);
 
   return (
     <Box maxW="100%" mx="auto" p={5}>
