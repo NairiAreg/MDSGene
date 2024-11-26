@@ -329,12 +329,13 @@ const Gene = () => {
                       <Tr key={study.pmid}>
                         <Td whiteSpace="pre">
                           <Link
-                            as={RouterLink}
-                            color="blue.500"
-                            to={`/genes/${geneName}/${study.pmid}`}
+                              as={RouterLink}
+                              color="blue.500"
+                              to={`/genes/${geneName}/${study.pmid}`}
                           >
                             {study?.author_year}
-                          </Link>
+                          </Link><br/>
+                          <sub>PMID:{study?.pmid}</sub>
                         </Td>
                         <Td textTransform="capitalize">{study.study_design}</Td>
                         <Td>{study.number_of_cases}</Td>
