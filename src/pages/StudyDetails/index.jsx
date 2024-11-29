@@ -132,11 +132,7 @@ const StudyDetails = () => {
                 <Td>{renderSymptoms(patient.symptoms)}</Td>
                 <Td>
                   <CollapsibleMutations
-                    mutations={patient.reported_mutations.map((mutation) => ({
-                      type: "single",
-                      name: mutation.name,
-                      genotype: mutation.genotype,
-                    }))}
+                    mutations={patient.reported_mutations}
                     onMutationClick={handleMutationClick}
                   />
                 </Td>
