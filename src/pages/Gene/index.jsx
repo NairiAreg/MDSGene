@@ -222,6 +222,13 @@ const Gene = () => {
     setCurrentPage(1);
   };
 
+  // In your parent component:
+  const variantOrder = {
+    "Likely pathogenic": 1,
+    "VUS": 2,
+    // Add other variants as needed
+  };
+
   if (error) return <Text>An error occurred: {error.message}</Text>;
 
   return (
@@ -269,6 +276,7 @@ const Gene = () => {
                 label="Carrying"
                 selectedItems={selectedMutations}
                 setSelectedItems={setSelectedMutations}
+                customOrder={variantOrder}
               />
             </Box>
             <Box width="48%">

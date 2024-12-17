@@ -21,14 +21,17 @@ const MultiSelectDropdown = ({
   setSelectedItems,
   placeholder,
   label,
+  customOrder = {} // Add customOrder prop to control option ordering
 }) => {
   const [inputValue, setInputValue] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
 
+  // Modified flattenMutations to remove duplicates and handle ordering
   const flattenMutations = (mutations) => {
-    return mutations
+    const seen = new Set();
+    const flattened = mutations
       .map((mutation) => {
         if (typeof mutation === "string") {
           return mutation;
@@ -39,7 +42,22 @@ const MultiSelectDropdown = ({
         }
         return [];
       })
-      .flat();
+      .flat()
+      .filter(item => {
+        // Remove duplicates
+        if (item && !seen.has(item)) {
+          seen.add(item);
+          return true;
+        }
+        return false;
+      });
+
+    // Sort items based on customOrder
+    return flattened.sort((a, b) => {
+      const orderA = customOrder[a] || Number.MAX_SAFE_INTEGER;
+      const orderB = customOrder[b] || Number.MAX_SAFE_INTEGER;
+      return orderA - orderB;
+    });
   };
 
   const flattenedOptions = flattenMutations(options);
