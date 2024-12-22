@@ -15,20 +15,39 @@ import {
 } from "@chakra-ui/react"; // Добавляем InputGroup и InputRightElement
 import { searchCountriesByAbbr } from "utils/utils";
 
+// Helper function to extract position number from variant string
+const getVariantPosition = (variant) => {
+  const match = variant.match(/\d+/);
+  return match ? parseInt(match[0]) : Infinity;
+};
+
+// Define categorical variants and their order
+const categoryOrder = {
+  "pathogenic": 1,
+  "likely pathogenic": 2,
+  "vus": 3,
+  "risk variant": 4
+};
+
+// Updated helper function to determine if a string is a categorical variant
+const isCategoricalVariant = (variant) => {
+  return Object.keys(categoryOrder).some(category =>
+    variant.toLowerCase().includes(category.toLowerCase())
+  );
+};
+
 const MultiSelectDropdown = ({
   options,
   selectedItems,
   setSelectedItems,
   placeholder,
   label,
-  customOrder = {} // Add customOrder prop to control option ordering
 }) => {
   const [inputValue, setInputValue] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
 
-  // Modified flattenMutations to remove duplicates and handle ordering
   const flattenMutations = (mutations) => {
     const seen = new Set();
     const flattened = mutations
@@ -52,12 +71,35 @@ const MultiSelectDropdown = ({
         return false;
       });
 
-    // Sort items based on customOrder
-    return flattened.sort((a, b) => {
-      const orderA = customOrder[a] || Number.MAX_SAFE_INTEGER;
-      const orderB = customOrder[b] || Number.MAX_SAFE_INTEGER;
-      return orderA - orderB;
+    // Separate categorical and specific variants
+    const categorical = flattened.filter(item => isCategoricalVariant(item));
+    const specific = flattened.filter(item => !isCategoricalVariant(item));
+
+    // Sort categorical variants by predefined order
+    const sortedCategorical = categorical.sort((a, b) => {
+      const getCategoryOrder = (variant) => {
+        const category = Object.keys(categoryOrder).find(cat =>
+          variant.toLowerCase().includes(cat.toLowerCase())
+        );
+        return category ? categoryOrder[category] : Infinity;
+      };
+
+      return getCategoryOrder(a) - getCategoryOrder(b);
     });
+
+    // Sort specific variants by position
+    const sortedSpecific = specific.sort((a, b) => {
+      const posA = getVariantPosition(a);
+      const posB = getVariantPosition(b);
+      if (posA === posB) {
+        // If positions are the same, sort alphabetically
+        return a.localeCompare(b);
+      }
+      return posA - posB;
+    });
+
+    // Combine sorted arrays with categorical variants first
+    return [...sortedCategorical, ...sortedSpecific];
   };
 
   const flattenedOptions = flattenMutations(options);
