@@ -62,10 +62,11 @@ const SymptomsSelector = () => {
         .filter(([_, isSelected]) => isSelected)
         .map(([symptom]) => symptom);
 
-      await sendSymptoms({ age, symptoms: selectedSymptomsList });
+      const response = await sendSymptoms({ age, symptoms: selectedSymptomsList });
+      // Показываем данные из response в toast
       toast({
-        title: "Symptoms submitted",
-        description: "Your symptoms have been sent for analysis.",
+        title: response.title || "Analysis Complete", // Используем title из ответа если есть
+        description: response.message || JSON.stringify(response, null, 2), // Показываем сообщение или весь ответ
         status: "success",
         duration: 3000,
         isClosable: true,
@@ -118,7 +119,7 @@ const SymptomsSelector = () => {
                   isChecked={selectedSymptoms[symptom]}
                   onChange={() => handleSymptomToggle(symptom)}
                 >
-                  {symptom.split("_").slice(0, -1).join(" ")}
+                  {symptom/*{symptom.replace(/_hp:\d+/g, "").replace(/_/g, " ")}*/}
                 </Checkbox>
               ))}
             </SimpleGrid>

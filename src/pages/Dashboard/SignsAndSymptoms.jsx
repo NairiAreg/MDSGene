@@ -36,18 +36,18 @@ const SignsAndSymptoms = () => {
         </Box>
       </Alert>
 
-      <Box>
-        <video
-          ref={videoRef}
-          width="100%"
-          height="auto"
-          controls
-          src="video.mp4"
-        />
-        <HStack mt={2} justifyContent="center">
-          <Button onClick={handlePlayPause}>Play/Pause</Button>
-        </HStack>
-      </Box>
+      {/*<Box>*/}
+      {/*  <video*/}
+      {/*    ref={videoRef}*/}
+      {/*    width="100%"*/}
+      {/*    height="auto"*/}
+      {/*    controls*/}
+      {/*    src="video.mp4"*/}
+      {/*  />*/}
+      {/*  <HStack mt={2} justifyContent="center">*/}
+      {/*    <Button onClick={handlePlayPause}>Play/Pause</Button>*/}
+      {/*  </HStack>*/}
+      {/*</Box>*/}
 
       <VStack spacing={6} align="stretch">
         <SymptomsSelector />
