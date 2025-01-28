@@ -28,7 +28,7 @@ import {
   MenuItem,
   Divider,
 } from "@chakra-ui/react";
-import { PieChartIcon, GlobeIcon, ChevronDownIcon } from "lucide-react";
+import { PieChartIcon, GlobeIcon, ChevronDownIcon, DnaIcon } from "lucide-react";
 import MultiSelectDropdown from "components/MultiSelectDropdown";
 import SingleSelectDropdown from "components/SingleSelectDropdown";
 import { uniqueStudiesQuery, mutationDataQuery } from "api/api-service";
@@ -41,13 +41,20 @@ import CollapsibleMutations from "components/CollapsibleMutations";
 import CustomSpinner from "components/CustomSpinner";
 import Charts from "../Charts";
 import WorldMap from "../WorldMap";
+import GeneticFindings from "../GeneticFindings";
 import AdvancedPagination from "components/AdvancedPagination";
 import Search from "components/Search";
 import MutationDataDisplay from "components/MutationDataDisplay";
 
+// List of genes that should show the additional button
+const GENES_WITH_EXTRA_INFO = ['THAP1'];
+
 const Gene = () => {
   const { geneName } = useParams();
   const [disease, gene] = geneName.split("-");
+  const showExtraButton = useMemo(() => {
+    return GENES_WITH_EXTRA_INFO.includes(gene);
+  }, [gene]);
   const {
     isOpen: isChartsOpen,
     onOpen: onChartsOpen,
@@ -57,6 +64,11 @@ const Gene = () => {
     isOpen: isWorldMapOpen,
     onOpen: onWorldMapOpen,
     onClose: onWorldMapClose,
+  } = useDisclosure();
+  const {
+    isOpen: isGeneticFindingsOpen,
+    onOpen: onGeneticFindingsOpen,
+    onClose: onGeneticFindingsClose,
   } = useDisclosure();
 
   const [filters, setFilters] = useState({
@@ -232,7 +244,8 @@ const Gene = () => {
             Overview of included studies for <br />
             {mapperForGeneDiseaseAbbr(geneName)}
           </Heading>
-          <Flex gap={4}>
+          <Flex gap={4} direction="column">
+            <Flex gap={4} >
             <Button
               leftIcon={<PieChartIcon />}
               onClick={onChartsOpen}
@@ -249,6 +262,17 @@ const Gene = () => {
             >
               View World Map
             </Button>
+            </Flex>
+            {showExtraButton && (
+                <Button
+                    leftIcon={<DnaIcon />}
+                    onClick={onGeneticFindingsOpen}
+                    colorScheme="green"
+                    variant="outline"
+                >
+                  View Genetic Findings
+                </Button>
+            )}
           </Flex>
         </Flex>
 
@@ -449,6 +473,17 @@ const Gene = () => {
             <ModalCloseButton />
             <ModalBody>
               <WorldMap geneName={geneName} filters={getFilterParams()} />
+            </ModalBody>
+          </ModalContent>
+        </Modal>
+
+        <Modal isOpen={isGeneticFindingsOpen} onClose={onGeneticFindingsClose} size="full">
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Genetic findings for {mapperForGeneDiseaseAbbr(geneName)}</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <GeneticFindings geneName={geneName} filters={getFilterParams()} />
             </ModalBody>
           </ModalContent>
         </Modal>
