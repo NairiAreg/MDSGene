@@ -10,6 +10,7 @@ import Gene from "./Gene";
 import Charts from "./Charts";
 import StudyDetails from "./StudyDetails";
 import WorldMap from "./WorldMap";
+import SymptomsAnalysis from "./SymptomsAnalysis";
 
 const routes = [
   {
@@ -92,6 +93,13 @@ const routes = [
   {
     path: "/genes/:geneName/:pmid",
     Component: StudyDetails,
+    Layout: DefaultLayout,
+    secured: false,
+    exact: true,
+  },
+  {
+    path: "/symptoms-analysis",
+    Component: SymptomsAnalysis,
     Layout: DefaultLayout,
     secured: false,
     exact: true,

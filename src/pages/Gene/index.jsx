@@ -47,7 +47,7 @@ import Search from "components/Search";
 import MutationDataDisplay from "components/MutationDataDisplay";
 
 // List of genes that should show the additional button
-const GENES_WITH_EXTRA_INFO = ['THAP1'];
+const GENES_WITH_EXTRA_INFO = ['THAP1', 'GBA1', 'LRRK2', 'PINK1'];
 
 const Gene = () => {
   const { geneName } = useParams();
@@ -249,16 +249,20 @@ const Gene = () => {
             <Button
               leftIcon={<PieChartIcon />}
               onClick={onChartsOpen}
-              colorScheme="blue"
               variant="outline"
+              color="#1D5C9B"
+              borderColor="#1D5C9B"
+              _hover={{ bg: "#1D5C9B20" }}
             >
               View Charts
             </Button>
             <Button
               leftIcon={<GlobeIcon />}
               onClick={onWorldMapOpen}
-              colorScheme="green"
               variant="outline"
+              color="#B31F24"
+              borderColor="#B31F24"
+              _hover={{ bg: "#B31F2420" }}
             >
               View World Map
             </Button>
@@ -267,8 +271,10 @@ const Gene = () => {
                 <Button
                     leftIcon={<DnaIcon />}
                     onClick={onGeneticFindingsOpen}
-                    colorScheme="green"
                     variant="outline"
+                    color="#666666"
+                    borderColor="#666666"
+                    _hover={{ bg: "#66666620" }}
                 >
                   View Genetic Findings
                 </Button>
